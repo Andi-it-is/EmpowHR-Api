@@ -36,6 +36,13 @@ export class User {
     @UpdateDateColumn()
     updated_at: Date;
 
+    // Vorgesetzter
+    @ManyToOne(() => User, user => user.subordinates, { nullable: true })
+    supervisor: User
+
+    // Untergebene
+    @OneToMany(() => User, user => user.supervisor)
+    subordinates: User[]
 
     @OneToMany(() => Token, token => token.user)
     token: Token[];
