@@ -1,5 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany, CreateDateColumn, UpdateDateColumn } from "typeorm"
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, CreateDateColumn, UpdateDateColumn, OneToOne, ManyToOne } from "typeorm"
 import { Token } from "./Token"
+import { UserMasterData } from "./UserMasterData"
+import { UserTimeAccount } from "./UserTimeAccount"
+import { Document } from "./Document"
+import { Certificate } from "./Certificate"
+import { Department } from "./Department"
 
 @Entity()
 export class User {
@@ -35,4 +40,18 @@ export class User {
     @OneToMany(() => Token, token => token.user)
     token: Token[];
 
+    @OneToOne(() => UserMasterData, master_data => master_data.user, { cascade: true })
+    master_data: UserMasterData;
+
+    @OneToOne(() => UserTimeAccount, time_account => time_account.user, { cascade: true })
+    time_account: UserTimeAccount;
+
+    @OneToMany(() => Document, document => document.user)
+    documents: Document[]
+
+    @OneToMany(() => Certificate, certificate => certificate.user)
+    certificates: Certificate[]
+
+    @ManyToOne(() => Department, department => department.users, { nullable: true })
+    department: Department
 }
