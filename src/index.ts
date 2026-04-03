@@ -107,7 +107,8 @@ const connectToDb = async (): Promise<any> => {
 
     await AppDataSource.runMigrations();
 
-    console.log(`Migrations successful | ${env} | Backend ready`);
+    console.log(`Migrations successful | ${env} | Backend ready`)
+    console.log(`|--- Api Documentation is available under localhost:${PORT}/api-docs ---|`)
 
     return;
 };

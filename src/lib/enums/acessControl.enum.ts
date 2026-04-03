@@ -32,6 +32,12 @@ export enum PermissionAction {
   DELETE = 'DELETE'
 }
 
+export enum ChangeLogAction {
+  CREATE = 'CREATE',
+  UPDATE = 'UPDATE',
+  DELETE = 'DELETE'
+}
+
 
 export enum RoleName {
   EMPLOYEE = 'EMPLOYEE',                    // Mitarbeiter
@@ -116,7 +122,25 @@ export enum ExistingEntityNames {
   USER_MASTER_DATA = 'UserMasterData',
   USER_TIME_ACCOUNT = 'UserTimeAccount',
   ROLE = 'Role',
-  Permission = 'Permission'
+  PERMISSION = 'Permission',
+  LOCATION = 'Location',
+  BOOKABLE_RESSOURCE = 'BookableRessource',
+  BOOKING_RESSOURCE_ENTRY = 'BookingRessourceEntry'
 }
 
+export enum ExistingDatabaseTableNames {
+  CERTIFICATE = 'certificate',
+  DEPARTMENT = 'cepartment',
+  DOCUMENT = 'document',
+  TIME_ENTRY = 'timeEntry',
+  TOKEN = 'token',
+  USER = 'user',
+  USER_MASTER_DATA = 'user_master_data',
+  USER_TIME_ACCOUNT = 'User_time_account',
+  ROLE = 'role',
+  PERMISSION = 'permission',
+  LOCATION = 'location',
+  BOOKABLE_RESSOURCE = 'bookable_ressource',
+  BOOKING_RESSOURCE_ENTRY = 'booking_ressource_entry'
+}
 
