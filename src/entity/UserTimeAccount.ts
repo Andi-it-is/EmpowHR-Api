@@ -1,6 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany, CreateDateColumn, UpdateDateColumn, OneToOne, JoinColumn } from "typeorm"
 import { User } from "./User"
 import { TimeEntry } from "./TimeEntry"
+import { AppDataSource } from "../AppDataSource"
 
 @Entity()
 export class UserTimeAccount {

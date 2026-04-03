@@ -21,7 +21,6 @@ export class Department {
 
     // Self-referencing for Hierarchy
     @ManyToOne(() => Department, department => department.children, { nullable: true })
-    @JoinColumn({ name: 'parent_id' })
     parent: Department
 
     @OneToMany(() => Department, department => department.parent)

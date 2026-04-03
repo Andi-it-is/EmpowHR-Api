@@ -6,6 +6,7 @@ import { Document } from "./Document"
 import { Certificate } from "./Certificate"
 import { Department } from "./Department"
 import { Role } from "./Role"
+import { ResourceBookingEntry } from "./BookingRessourceEntry"
 
 @Entity()
 export class User {
@@ -66,5 +67,8 @@ export class User {
     @ManyToMany(() => Role, role => role.users)
     @JoinTable()
     roles: Role[];
+
+    @OneToMany(() => ResourceBookingEntry, booking => booking.user)
+    resource_bookings: ResourceBookingEntry[]
 
 }
