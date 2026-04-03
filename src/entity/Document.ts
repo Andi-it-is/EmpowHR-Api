@@ -2,7 +2,7 @@
 
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne } from "typeorm"
 import { User } from "./User"
-import { DocumentSecurityLevel, DocumentType } from "../lib/enums/rolesPermissionsDocuments.enum"
+import { DocumentSecurityLevel, DocumentType } from "../lib/enums/acessControl.enum"
 
 @Entity()
 export class Document {
@@ -20,6 +20,8 @@ export class Document {
     })
     type: DocumentType
 
+    // Zugriffskontrolle für fremde User (i.e. nicht-besitzer des Dokuments). 
+    // Besitzer des Dokumentes ignorieren in der API Logik dieses max_level. 
     @Column({
         type: 'enum',
         enum: DocumentSecurityLevel,

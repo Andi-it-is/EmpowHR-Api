@@ -1,10 +1,11 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany, CreateDateColumn, UpdateDateColumn, OneToOne, ManyToOne } from "typeorm"
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, CreateDateColumn, UpdateDateColumn, OneToOne, ManyToOne, ManyToMany, JoinTable } from "typeorm"
 import { Token } from "./Token"
 import { UserMasterData } from "./UserMasterData"
 import { UserTimeAccount } from "./UserTimeAccount"
 import { Document } from "./Document"
 import { Certificate } from "./Certificate"
 import { Department } from "./Department"
+import { Role } from "./Role"
 
 @Entity()
 export class User {
@@ -61,4 +62,9 @@ export class User {
 
     @ManyToOne(() => Department, department => department.users, { nullable: true })
     department: Department
+
+    @ManyToMany(() => Role, role => role.users)
+    @JoinTable()
+    roles: Role[];
+
 }

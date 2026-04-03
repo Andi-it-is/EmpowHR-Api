@@ -1,4 +1,4 @@
-import { DocumentSecurityLevel } from "../lib/enums/rolesPermissionsDocuments.enum"
+import { DocumentSecurityLevel } from "../lib/enums/acessControl.enum"
 
 export const securityLevelLabels: Record<DocumentSecurityLevel, string> = {
   [DocumentSecurityLevel.RESTRICTED]: 'Restricted',
