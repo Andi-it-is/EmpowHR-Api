@@ -1,5 +1,6 @@
 import { PrimaryGeneratedColumn, Column, Generated, CreateDateColumn, Entity, ManyToOne } from "typeorm";
 import { User } from "./User";
+import { TokenType } from "../lib/enums/tokenType.enum";
 
 @Entity()
 export class Token {
@@ -11,8 +12,12 @@ export class Token {
     @Generated("uuid")
     token: string;
 
-    @Column()
-    type: 'refresh' | 'access';
+    @Column({
+        type: 'enum',
+        enum: TokenType,
+        default: TokenType.ACCESS
+    })
+    type: TokenType;
 
     @Column()
     valid_until: Date;

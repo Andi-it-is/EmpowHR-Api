@@ -1,17 +1,15 @@
 import { Router } from "express";
-
-// import { userTokenChecker } from "../../lib/middleware/tokenChecker";
+import { userTokenChecker } from "../../lib/middleware/userTokenChecker";
 import publicRouter from "./publicRoutes/router";
 import userRouter from "./user/router";
 
 const router = Router()
 
+// public routes
 router.use("/public", publicRouter)
 
-// router use token checker
+// protected routes
+router.use("/user", userTokenChecker, userRouter)
 
-// router.use("/user", userTokenChecker, userRouter)
-
-// saved routes
 
 export default router;

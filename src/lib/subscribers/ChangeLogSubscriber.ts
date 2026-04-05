@@ -25,7 +25,6 @@ export class ChangeLogSubscriber implements EntitySubscriberInterface {
         if (!data) return null
         const sanitized = JSON.parse(JSON.stringify(data)) // deep clone
         this.sensitiveFields.forEach(field => this.deletePath(sanitized, field))
-        console.log("sanitized fields ", sanitized)
         return sanitized
     }
 

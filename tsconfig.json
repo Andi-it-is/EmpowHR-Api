@@ -11,14 +11,16 @@
       ],
       "target": "es6",
       "module": "commonjs",
-      "moduleResolution": "node",
-      "outDir": "./build",
+      // "moduleResolution": "node",
+      "rootDir": "./src",
+      "outDir": "./dist",
       "emitDecoratorMetadata": true,
       "experimentalDecorators": true,
       "sourceMap": true,
       "esModuleInterop": true,
       "allowSyntheticDefaultImports": true,
-      "strictPropertyInitialization": false
+      "strictPropertyInitialization": false,
+      "strictFunctionTypes": false
    },
    "include": [
       "src/**/*.ts"
