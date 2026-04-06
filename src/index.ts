@@ -1,8 +1,37 @@
 require("reflect-metadata"); // Must remain require at the very top
+require("dotenv").config();
 
 // express
 import express, { Request } from "express";
 const app = express();
+
+const cors = require('cors')
+
+// for allowing preflight requests in a cors context
+// app.use((req, res, next) => {
+//     if (req.method === 'OPTIONS') {
+//         res.header('Access-Control-Allow-Origin', process.env.CORS_ORIGIN)
+//         res.header('Access-Control-Allow-Methods', 'GET, PUT, PATCH, POST, DELETE, OPTIONS')
+//         res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+//         res.header('Access-Control-Allow-Credentials', 'true')
+//         return res.sendStatus(204)
+//     }
+//     next()
+// })
+
+let corsOptions = {
+    origin: process.env.CORS_ORIGIN,
+    optionSuccessStatus: 200,
+    methods: ['GET', 'PUT', 'PATCH', 'POST', 'DELETE'],
+    credentials: true,
+    allowedHeaders: ['Content-Type', 'Authorization']
+}
+app.use(cors(corsOptions))
+
+import cookieParser from "cookie-parser";
+app.use(cookieParser());
+
+app.use(express.json())
 
 // helmet
 import helmet from "helmet";
@@ -12,35 +41,12 @@ app.use(helmet());
 import morgan from "morgan";
 
 // Custom logging format.
-const loggingFormat = ":date[iso] - :method - :url - :status - :response-time ms - :total-time ms - :res[content-length]";
+const loggingFormat = ":date[iso] - :method - :url - Status :status - :response-time ms - :total-time ms - :res[content-length]";
 app.use(morgan(loggingFormat, {
     skip: (req: Request) => {
         return req.method === 'OPTIONS' || process.env.NODE_ENV == "test";
     }
 }));
-
-
-// // body parser
-// import bodyparser from "body-parser";
-// app.use(bodyparser.json());
-
-// TODO: cors
-const cors = require('cors')
-// app.use(function (req, res, next) {
-//     res.header("Access-Control-Allow-Origin", "*"); // update to match the domain you will make the request from
-//     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-//     next();
-// });
-// app.use(cors());  
-
-
-let corsOptions = {
-    origin: process.env.CORS_ORIGIN,
-    optionSuccessStatus: 200,
-    methods: ['GET', 'PUT', 'PATCH', 'POST', 'DELETE']
-}
-app.use(cors(corsOptions))
-app.use(express.json())
 
 // routes
 import versionRouter from "./api/versionRouter";

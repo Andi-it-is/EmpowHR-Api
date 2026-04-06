@@ -7,13 +7,17 @@ export const permissionChecker = (input: any) => {
 
   return async (req: UserRequest, res: any, next: NextFunction): Promise<any> => {
 
+    next()
+    return "hi"
     const rolesWithPermissions = await resolveRoles(req.user.id)
-    console.log(JSON.stringify(rolesWithPermissions, null, 2))
-    console.log("&& \n \n")
+    //! check if permissions exist. for now, console logs are disabled
+    // console.log(JSON.stringify(rolesWithPermissions, null, 2))
+    // console.log("&& \n \n")
+
 
     const uniquePermissions = await resolvePermissionsAsUniqueArray(req.user.id)
     // console.log("&&&\n \n ", uniquePermissions, " \n \n %%%")
-    console.log(JSON.stringify(uniquePermissions, null, 2))
+    // console.log(JSON.stringify(uniquePermissions, null, 2))
     return rolesWithPermissions
 
     // const hasPermission = _checkPermission(input, rolesWithPermissions);

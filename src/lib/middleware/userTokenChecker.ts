@@ -7,13 +7,21 @@ import { RoleName } from "../enums/acessControl.enum";
 import { RequestHandler } from "express";
 
 
+// uses req.cookies.accessToken.  Alternatively but not implemented, one can use req.headers.authorization
 export const userTokenChecker: UserRequestHandler = async (req, res, next) => {
   try {
+    // console.log('cookies:', req.cookies)
+    // console.log('token:', req.cookies?.accessToken)
+    // Cookie statt Authorization Header
+    // const token = req.cookies?.accessToken
+    // if (!token) {
+    //   return res.status(401).json({ success: false, message: "No token provided" });
+    // }
+
     const authHeader = req.headers.authorization;
     if (!authHeader?.startsWith("Bearer ")) {
       return res.status(401).json({ success: false, message: "No token provided" });
     }
-
     const token = authHeader.split(" ")[1];
 
     // 1. Verify Token

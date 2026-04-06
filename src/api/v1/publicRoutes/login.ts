@@ -133,7 +133,7 @@ export const login: RequestHandler = async (req, res, next) => {
       })
 
     if (!user) {
-      return res.status(404).json({
+      return res.status(422).json({
         success: false,
         message: "User mit der Email konnte nicht gefunden werden."
       })
@@ -192,7 +192,6 @@ export const login: RequestHandler = async (req, res, next) => {
     accessToken.parent_token = refreshToken
 
     await AppDataSource.manager.save(Token, accessToken)
-
 
     return res.status(200).json({
       success: true,

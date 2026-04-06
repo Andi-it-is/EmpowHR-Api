@@ -5,10 +5,11 @@ import bcrypt from "bcrypt"
 import Joi from "joi"
 
 export const bodySchema = Joi.object({
-  firstname: Joi.string().min(2).max(50).required(),
-  lastname: Joi.string().min(2).max(50).required(),
+  firstname: Joi.string().min(2).max(50).optional(),
+  lastname: Joi.string().min(2).max(50).optional(),
   email: Joi.string().email().required(),
   password: Joi.string().min(8).max(100).required(),
+  passwordConfirm: Joi.string().min(8).max(100).required(),
 })
 
 /**
@@ -135,8 +136,9 @@ export const register: RequestHandler = async (req, res, next) => {
 
     const user = new User()
 
-    user.firstname = body.firstname
-    user.lastname = body.lastname
+
+    user.firstname = body.firstname ?? 'Dennis'
+    user.lastname = body.lastname ?? 'Demo'
     user.email = body.email
     user.password_hash = password_hash
 

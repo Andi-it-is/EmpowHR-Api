@@ -3,6 +3,7 @@ import { Router, Request, Response } from 'express';
 import { getHelloWorld, postHelloWorld, patchHelloWorld, putHelloWorld, deleteHelloWorld } from './helloWorld';
 import { register } from './register';
 import { login } from './login';
+import { logout } from './logout';
 
 const publicRouter = Router();
 
@@ -14,5 +15,6 @@ publicRouter.delete('/hello/:id', deleteHelloWorld)
 
 publicRouter.post('/register', register)
 publicRouter.post('/login', login)
+publicRouter.post('/logout', logout)
 
 export default publicRouter;
