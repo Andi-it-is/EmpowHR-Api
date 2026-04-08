@@ -16,8 +16,6 @@ export const getDocumentsByFilter: UserRequestHandler = async (req, res, next) =
   try {
     const { type, security_level, date_from, date_to } = await bodySchema.validateAsync(req.body)
 
-    console.log(req.body)
-
     const documents = await AppDataSource.getRepository(Document).find({
       where: {
         user: { id: req.user.id },
@@ -42,8 +40,6 @@ export const getDocumentsByFilter: UserRequestHandler = async (req, res, next) =
       },
       order: { created_at: 'DESC' }
     })
-
-    console.log(documents)
 
     return res.status(200).json({
       success: true,

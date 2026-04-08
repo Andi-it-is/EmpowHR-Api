@@ -23,8 +23,6 @@ export const getDocumentFile: UserRequestHandler = async (req, res, next) => {
       },
     })
 
-    console.log(doc)
-
     if (!doc) return res.status(404).json({ success: false, message: 'Nicht gefunden' })
 
     res.setHeader('Content-Type', 'application/pdf')
