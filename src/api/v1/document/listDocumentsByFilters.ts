@@ -12,7 +12,7 @@ const bodySchema = Joi.object({
   date_to: Joi.string().isoDate().optional(),
 })
 
-export const getDocumentsByFilter: UserRequestHandler = async (req, res, next) => {
+export const listDocumentsByFilters: UserRequestHandler = async (req, res, next) => {
   try {
     const { type, security_level, date_from, date_to } = await bodySchema.validateAsync(req.body)
 

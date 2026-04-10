@@ -1,14 +1,14 @@
 import { Router, Request, Response } from 'express';
 import { permissionChecker } from '../../../lib/middleware/permissionChecker';
-import { getDocuments } from './getDocuments';
-import { getDocumentFile } from './getDocumentFile';
-import { getDocumentsByFilter } from './getDocumentsByFilters';
+import { listDocuments } from './listDocuments';
+import { getDocumentById } from './getDocumentById';
+import { listDocumentsByFilters } from './listDocumentsByFilters';
 
 const documentRouter = Router();
 
-documentRouter.get('/my', getDocuments)
-documentRouter.post('/my/filter', getDocumentsByFilter)
+documentRouter.get('/my', listDocuments)
+documentRouter.post('/my/filter', listDocumentsByFilters)
 
-documentRouter.get('/:id/file', getDocumentFile)
+documentRouter.get('/:id/file', getDocumentById)
 
 export default documentRouter;

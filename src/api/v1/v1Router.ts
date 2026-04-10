@@ -6,6 +6,7 @@ import userMasterDataRouter from "./userMasterData/router";
 import { contextMiddleware } from "../../lib/middleware/dbContextResolver";
 import changeLogRouter from "./chnageLogHistory/router";
 import documentRouter from "./document/router";
+import certificateRouter from "./certificate/router";
 
 const router = Router()
 
@@ -18,6 +19,7 @@ router.use(userTokenChecker)
 router.use(contextMiddleware)
 
 router.use("/changelog", changeLogRouter)
+router.use("/certificate", certificateRouter)
 router.use("/document", documentRouter)
 router.use("/user", userRouter)
 router.use("/userMasterData", userMasterDataRouter)

@@ -5,7 +5,7 @@ import Joi from 'joi'
 import { DocumentSecurityLevel, DocumentType } from "../../../lib/enums/acessControl.enum"
 
 
-export const getDocuments: UserRequestHandler = async (req, res, next) => {
+export const listDocuments: UserRequestHandler = async (req, res, next) => {
   try {
     const id = req.user.id
 
