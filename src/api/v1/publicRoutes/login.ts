@@ -7,8 +7,6 @@ import bcrypt from "bcryptjs"
 import jwt from "jsonwebtoken"
 import Joi from "joi"
 import { TokenType } from "../../../lib/enums/tokenType.enum"
-import * as dotenv from "dotenv"
-dotenv.config()
 
 export const bodySchema = Joi.object({
   email: Joi.string().email().required(),

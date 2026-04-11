@@ -5,9 +5,6 @@ import { UserRequest, UserRequestHandler } from "../classes/UserRequestHandler";
 import { User } from "../../entity/User";
 import { RoleName } from "../enums/acessControl.enum";
 import { RequestHandler } from "express";
-import * as dotenv from "dotenv"
-dotenv.config()
-
 
 // uses req.cookies.accessToken.  Alternatively but not implemented, one can use req.headers.authorization
 export const userTokenChecker: UserRequestHandler = async (req, res, next) => {
@@ -27,6 +24,7 @@ export const userTokenChecker: UserRequestHandler = async (req, res, next) => {
     const token = authHeader.split(" ")[1];
 
     // 1. Verify Token
+    console.log('using this token |------| ', process.env.JWT_ACCESS_TOKEN_SECRET)
     const decoded = jwt.verify(token, process.env.JWT_ACCESS_TOKEN_SECRET!) as {
       userId: string
       firstname: string

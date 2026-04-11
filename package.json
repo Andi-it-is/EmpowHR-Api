@@ -12,10 +12,10 @@
     "test": "test",
     "dev": "nodemon src/index.ts",
     "create_migration": "npx typeorm-ts-node-commonjs migration:generate -d src/AppDataSource.ts ./src/migration",
-    "migration:generate:dev": "NODE_ENV=development typeorm-ts-node-commonjs migration:generate src/migration/postgres/Migration -d src/data-source.ts",
-    "migration:generate:prod": "NODE_ENV=production typeorm-ts-node-commonjs migration:generate src/migration/mysql/Migration -d src/data-source.ts",
-    "migration:run:dev": "NODE_ENV=development typeorm-ts-node-commonjs migration:run -d src/data-source.ts",
-    "migration:run:prod": "NODE_ENV=production typeorm-ts-node-commonjs migration:run -d src/data-source.ts"
+    "migration:generate:dev": "NODE_ENV=development typeorm-ts-node-commonjs migration:generate src/migration/postgres/Migration -d src/AppDataSource.ts",
+    "migration:generate:prod": "NODE_ENV=production typeorm-ts-node-commonjs migration:generate src/migration/mysql/Migration -d src/AppDataSource.ts",
+    "migration:run:dev": "NODE_ENV=development typeorm-ts-node-commonjs migration:run -d src/AppDataSource.ts",
+    "migration:run:prod": "NODE_ENV=production typeorm-ts-node-commonjs migration:run -d src/AppDataSource.ts"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",

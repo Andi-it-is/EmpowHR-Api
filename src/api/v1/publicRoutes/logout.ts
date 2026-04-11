@@ -1,6 +1,4 @@
 import { RequestHandler } from "express"
-import * as dotenv from "dotenv"
-dotenv.config()
 
 /**
  * @swagger
