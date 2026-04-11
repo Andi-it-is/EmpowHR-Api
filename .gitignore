@@ -3,3 +3,4 @@ node_modules
 
 # Everything that is uploaded for the application
 uploads/
+dist/
