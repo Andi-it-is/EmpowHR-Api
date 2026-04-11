@@ -3,25 +3,14 @@ require("dotenv").config();
 
 // express
 import express, { Request } from "express";
+import path from "path";
 const app = express();
 
 const cors = require('cors')
 
-// for allowing preflight requests in a cors context
-// app.use((req, res, next) => {
-//     if (req.method === 'OPTIONS') {
-//         res.header('Access-Control-Allow-Origin', process.env.CORS_ORIGIN)
-//         res.header('Access-Control-Allow-Methods', 'GET, PUT, PATCH, POST, DELETE, OPTIONS')
-//         res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
-//         res.header('Access-Control-Allow-Credentials', 'true')
-//         return res.sendStatus(204)
-//     }
-//     next()
-// })
-
 let corsOptions = {
     origin: process.env.CORS_ORIGIN,
-    optionSuccessStatus: 200,
+    optionsSuccessStatus: 200,
     methods: ['GET', 'PUT', 'PATCH', 'POST', 'DELETE'],
     credentials: true,
     allowedHeaders: ['Content-Type', 'Authorization']
@@ -40,7 +29,6 @@ app.use(helmet());
 // setup logger
 import morgan from "morgan";
 
-// Custom logging format.
 const loggingFormat = ":date[iso] - :method - :url - Status :status - :response-time ms - :total-time ms - :res[content-length]";
 app.use(morgan(loggingFormat, {
     skip: (req: Request) => {
@@ -52,13 +40,16 @@ app.use(morgan(loggingFormat, {
 import versionRouter from "./api/versionRouter";
 app.use(versionRouter);
 
+// // static files & Vue Router fallback
+// app.use(express.static(path.join(__dirname, '../public')))
+// app.get('/{*path}', (req, res) => {
+//     res.sendFile(path.join(__dirname, '../public/index.html'))
+// })
 
 import { AppDataSource } from "./AppDataSource";
 const PORT: string = process.env.PORT || "3000";
 app.listen(PORT, async () => {
-
     console.log('Timezone:', Intl.DateTimeFormat().resolvedOptions().timeZone);
-
     await connectToDb();
     console.log(`Backend started. Listening on port: ${PORT}`);
 });
@@ -92,27 +83,22 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 const connectToDb = async (): Promise<any> => {
 
     for (let counter = 0; counter < 3; counter++) {
-
         try {
             await AppDataSource.initialize();
             break;
         } catch (error) {
-
             if (counter == 2) {
                 throw error;
             }
             console.log("could not connect to db - retry in 3 sec (" + (counter + 1) + "/3)");
             await delay(3);
         }
-
     }
 
     const env = process.env.NODE_ENV === "production" ? "MySQL (Production)" : "PostgreSQL (Development)";
     console.log(`Connection to DB successful - using ${env}`);
     console.log("Running migrations...");
-
     await AppDataSource.runMigrations();
-
     console.log(`Migrations successful | ${env} | Backend ready`)
     console.log(`|--- Api Documentation is available under localhost:${PORT}/api-docs ---|`)
 
