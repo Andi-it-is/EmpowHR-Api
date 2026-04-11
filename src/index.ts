@@ -22,9 +22,34 @@ app.use(cookieParser());
 
 app.use(express.json())
 
-// helmet
+// // helmet
 import helmet from "helmet";
-app.use(helmet());
+app.use(
+    helmet({
+        contentSecurityPolicy: {
+            useDefaults: true, // Wir starten mit den sicheren Standards
+            directives: {
+                // 1. Erlaubt dem Browser, den PDF-Worker-Thread zu starten
+                "worker-src": ["'self'", "blob:"],
+
+                // 2. Erlaubt das Laden der PDF-Logik (auch als Blob/Data-URL)
+                "script-src": ["'self'", "'unsafe-inline'", "blob:", "data:"],
+
+                // 3. Deine bestehenden Einstellungen für Bilder und PDFs
+                "img-src": ["'self'", "data:", "blob:"],
+                "connect-src": ["'self'", "https://empowhr.andreasivanov.de"],
+
+                // 4. Falls du doch noch irgendwo ein Iframe nutzt (zur Sicherheit)
+                "frame-src": ["'self'", "blob:"],
+
+                // Damit Chrome nicht wegen 'data:' in script-src-elem meckert
+                "script-src-elem": ["'self'", "'unsafe-inline'", "blob:", "data:"],
+            },
+        },
+        // WICHTIG: Erlaubt das Laden von Ressourcen über verschiedene Ursprünge hinweg (Cross-Origin)
+        crossOriginEmbedderPolicy: false,
+    })
+);
 
 // setup logger
 import morgan from "morgan";
