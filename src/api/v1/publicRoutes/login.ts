@@ -17,7 +17,8 @@ export const bodySchema = Joi.object({
  * @swagger
  * /public/login:
  *   post:
- *     summary: Authentifiziert einen User und gibt Tokens zurück
+ *     summary: Login
+ *     description: Authentifiziert einen Benutzer und gibt einen Access Token zurück.
  *     tags:
  *       - Public
  *     requestBody:
@@ -33,10 +34,10 @@ export const bodySchema = Joi.object({
  *               email:
  *                 type: string
  *                 format: email
- *                 example: max@firma.de
+ *                 example: "max@firma.de"
  *               password:
  *                 type: string
- *                 example: sicheresPasswort123
+ *                 example: "sicheresPasswort123"
  *     responses:
  *       200:
  *         description: Erfolgreich eingeloggt
@@ -53,10 +54,10 @@ export const bodySchema = Joi.object({
  *                   properties:
  *                     access_token:
  *                       type: string
- *                       example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+ *                       example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
  *                     expires_in:
  *                       type: integer
- *                       example: 3600
+ *                       example: 6000000
  *       400:
  *         description: Validierungsfehler
  *         content:
@@ -69,14 +70,14 @@ export const bodySchema = Joi.object({
  *                   example: false
  *                 message:
  *                   type: string
- *                   example: Validation Error
+ *                   example: "Validation Error"
  *                 errors:
  *                   type: array
  *                   items:
  *                     type: string
  *                   example: ['"email" must be a valid email']
  *       401:
- *         description: Ungültige Anmeldedaten
+ *         description: Ungültiges Passwort
  *         content:
  *           application/json:
  *             schema:
@@ -87,9 +88,9 @@ export const bodySchema = Joi.object({
  *                   example: false
  *                 message:
  *                   type: string
- *                   example: Ungültige Anmeldedaten.
- *       404:
- *         description: User nicht gefunden
+ *                   example: "Ungültige Anmeldedaten."
+ *       403:
+ *         description: Benutzer ist gesperrt
  *         content:
  *           application/json:
  *             schema:
@@ -100,7 +101,20 @@ export const bodySchema = Joi.object({
  *                   example: false
  *                 message:
  *                   type: string
- *                   example: User mit der Email konnte nicht gefunden werden.
+ *                   example: "Nutzer ist gesperrt."
+ *       422:
+ *         description: Benutzer mit dieser Email nicht gefunden
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "User mit der Email konnte nicht gefunden werden."
  *       500:
  *         description: Serverfehler
  */
@@ -139,9 +153,21 @@ export const login: RequestHandler = async (req, res, next) => {
       })
     }
 
+    if (user?.failed_login_attempts > 5) {
+      user.disabled = true
+      await AppDataSource.manager.save(user)
+
+      return res.status(403).json({
+        success: false,
+        message: "Nutzer ist gesperrt."
+      })
+    }
+
     // Passwort prüfen
     const passwordValid = await bcrypt.compare(body.password, user.password_hash)
     if (!passwordValid) {
+      user.failed_login_attempts += 1
+      await AppDataSource.manager.save(user)
       return res.status(401).json({
         success: false,
         message: "Ungültige Anmeldedaten."
