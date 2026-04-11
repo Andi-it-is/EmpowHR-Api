@@ -2,12 +2,12 @@ import { RequestHandler } from "express";
 
 /**
  * @swagger
- * /hello:
+ * /public/hello:
  *   get:
- *     summary: Hello World Test Route
+ *     summary: Hello World _Test Route
  *     description: Öffentliche Testroute zur API-Validierung
  *     tags:
- *       - Test
+ *       - _Test
  *     responses:
  *       200:
  *         description: Erfolgreiche Antwort
@@ -21,7 +21,7 @@ import { RequestHandler } from "express";
  *                   example: true
  *                 message:
  *                   type: string
- *                   example: Hello World from the Public Test Route.
+ *                   example: Hello World from the Public _Test Route.
  *       401:
  *         description: Nicht authentifiziert
  *       403:
@@ -33,7 +33,7 @@ export const getHelloWorld: RequestHandler = async (req, res, next) => {
   try {
     return res.status(200).json({
       success: true,
-      message: "Hello World from the Public Test Route."
+      message: "Hello World from the Public _Test Route."
     })
   } catch (error) {
     next(error)
@@ -42,12 +42,12 @@ export const getHelloWorld: RequestHandler = async (req, res, next) => {
 
 /**
  * @swagger
- * /hello:
+ * /public/hello:
  *   post:
  *     summary: Hello World POST Route
  *     description: Testroute mit Request Body
  *     tags:
- *       - Test
+ *       - _Test
  *     requestBody:
  *       required: true
  *       content:
@@ -111,12 +111,12 @@ export const postHelloWorld: RequestHandler = async (req, res, next) => {
 
 /**
  * @swagger
- * /hello/{id}:
+ * /public/hello/{id}:
  *   patch:
  *     summary: Hello World PATCH Route
  *     description: Testroute mit URL-Parameter und Body
  *     tags:
- *       - Test
+ *       - _Test
  *     parameters:
  *       - in: path
  *         name: id
@@ -198,12 +198,12 @@ export const patchHelloWorld: RequestHandler = async (req, res, next) => {
 
 /**
  * @swagger
- * /hello:
+ * /public/hello:
  *   put:
  *     summary: Hello World PUT Route
  *     description: Testroute mit Query Parametern
  *     tags:
- *       - Test
+ *       - _Test
  *     parameters:
  *       - in: query
  *         name: name
@@ -264,12 +264,12 @@ export const putHelloWorld: RequestHandler = async (req, res, next) => {
 
 /**
  * @swagger
- * /hello/{id}:
+ * /public/hello/{id}:
  *   delete:
  *     summary: Hello World DELETE Route
  *     description: Testroute mit URL-Parameter zum Löschen
  *     tags:
- *       - Test
+ *       - _Test
  *     parameters:
  *       - in: path
  *         name: id

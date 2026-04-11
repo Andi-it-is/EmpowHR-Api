@@ -9,6 +9,58 @@ export const paramSchema = Joi.object({
   id: Joi.string().required(),
 })
 
+/**
+ * @swagger
+ * /certificate/{id}/file:
+ *   get:
+ *     summary: Zertifikat als PDF abrufen
+ *     description: Gibt das PDF eines bestimmten Zertifikats des eingeloggten Benutzers zurück.
+ *     tags:
+ *       - Certificates
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID des Zertifikats
+ *     responses:
+ *       200:
+ *         description: PDF erfolgreich zurückgegeben
+ *         content:
+ *           application/pdf:
+ *             schema:
+ *               type: string
+ *               format: binary
+ *       404:
+ *         description: Zertifikat nicht gefunden
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Nicht gefunden"
+ *       400:
+ *         description: Validierungsfehler – ID fehlt
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: '"id" is not allowed to be empty'
+ *       500:
+ *         description: Serverfehler
+ */
 export const getCertificatesById: UserRequestHandler = async (req, res, next) => {
   try {
 

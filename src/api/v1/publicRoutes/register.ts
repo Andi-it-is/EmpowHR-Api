@@ -14,11 +14,11 @@ export const bodySchema = Joi.object({
 
 /**
  * @swagger
- * /auth/register:
+ * /public/register:
  *   post:
  *     summary: Registriert einen neuen User
  *     tags:
- *       - Auth
+ *       - Public
  *     requestBody:
  *       required: true
  *       content:

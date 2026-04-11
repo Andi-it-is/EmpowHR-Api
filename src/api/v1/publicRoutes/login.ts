@@ -15,11 +15,11 @@ export const bodySchema = Joi.object({
 
 /**
  * @swagger
- * /auth/login:
+ * /public/login:
  *   post:
  *     summary: Authentifiziert einen User und gibt Tokens zurück
  *     tags:
- *       - Auth
+ *       - Public
  *     requestBody:
  *       required: true
  *       content:

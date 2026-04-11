@@ -5,6 +5,57 @@ import Joi from 'joi'
 import { DocumentSecurityLevel, DocumentType } from "../../../lib/enums/acessControl.enum"
 
 
+/**
+ * @swagger
+ * /document/my:
+ *   get:
+ *     summary: Dokumente abrufen
+ *     description: Gibt alle Dokumente des eingeloggten Benutzers zurück, sortiert nach Erstellungsdatum absteigend.
+ *     tags:
+ *       - Documents
+ *     responses:
+ *       200:
+ *         description: Dokumente erfolgreich abgerufen
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                         format: uuid
+ *                         example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+ *                       title:
+ *                         type: string
+ *                         example: "Arbeitsvertrag 2024"
+ *                       type:
+ *                         type: string
+ *                         enum: [CONTRACT, FINANCE, ABSENCE, QUALIFICATION, COMPLIANCE]
+ *                         example: "CONTRACT"
+ *                       security_level:
+ *                         type: integer
+ *                         enum: [1, 2, 3, 4]
+ *                         description: "1 = RESTRICTED, 2 = CONFIDENTIAL, 3 = SECRET, 4 = TOP_SECRET"
+ *                         example: 1
+ *                       created_at:
+ *                         type: string
+ *                         format: date-time
+ *                         example: "2025-04-11T10:30:00.000Z"
+ *                       updated_at:
+ *                         type: string
+ *                         format: date-time
+ *                         example: "2025-04-11T10:30:00.000Z"
+ *       500:
+ *         description: Serverfehler
+ */
 export const listDocuments: UserRequestHandler = async (req, res, next) => {
   try {
     const id = req.user.id

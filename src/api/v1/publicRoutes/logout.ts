@@ -2,12 +2,12 @@ import { RequestHandler } from "express"
 
 /**
  * @swagger
- * /auth/logout:
+ * /public/logout:
  *   post:
  *     summary: Logout
  *     description: Meldet den Benutzer ab und löscht den Access Token Cookie
  *     tags:
- *       - Auth
+ *       - Public
  *     responses:
  *       200:
  *         description: Erfolgreich abgemeldet

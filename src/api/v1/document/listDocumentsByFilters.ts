@@ -12,6 +12,98 @@ const bodySchema = Joi.object({
   date_to: Joi.string().isoDate().optional(),
 })
 
+/**
+ * @swagger
+ * /document/my/filter:
+ *   post:
+ *     summary: Dokumente gefiltert abrufen
+ *     description: Gibt Dokumente des eingeloggten Benutzers gefiltert nach Typ, Sicherheitsstufe und Zeitraum zurück.
+ *     tags:
+ *       - Documents
+ *     requestBody:
+ *       required: false
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               type:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                   enum: [CONTRACT, FINANCE, ABSENCE, QUALIFICATION, COMPLIANCE]
+ *                 example: ["CONTRACT", "FINANCE"]
+ *               security_level:
+ *                 type: array
+ *                 items:
+ *                   type: integer
+ *                   enum: [1, 2, 3, 4]
+ *                 description: "1 = RESTRICTED, 2 = CONFIDENTIAL, 3 = SECRET, 4 = TOP_SECRET"
+ *                 example: [1, 2]
+ *               date_from:
+ *                 type: string
+ *                 format: date
+ *                 example: "2024-01-01"
+ *               date_to:
+ *                 type: string
+ *                 format: date
+ *                 example: "2024-12-31"
+ *     responses:
+ *       200:
+ *         description: Dokumente erfolgreich abgerufen
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                         format: uuid
+ *                         example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+ *                       title:
+ *                         type: string
+ *                         example: "Arbeitsvertrag 2024"
+ *                       type:
+ *                         type: string
+ *                         enum: [CONTRACT, FINANCE, ABSENCE, QUALIFICATION, COMPLIANCE]
+ *                         example: "CONTRACT"
+ *                       security_level:
+ *                         type: integer
+ *                         enum: [1, 2, 3, 4]
+ *                         description: "1 = RESTRICTED, 2 = CONFIDENTIAL, 3 = SECRET, 4 = TOP_SECRET"
+ *                         example: 1
+ *                       created_at:
+ *                         type: string
+ *                         format: date-time
+ *                         example: "2025-04-11T10:30:00.000Z"
+ *                       updated_at:
+ *                         type: string
+ *                         format: date-time
+ *                         example: "2025-04-11T10:30:00.000Z"
+ *       400:
+ *         description: Validierungsfehler – ungültige Filterwerte
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: '"type[0]" must be one of [CONTRACT, FINANCE, ABSENCE, QUALIFICATION, COMPLIANCE]'
+ *       500:
+ *         description: Serverfehler
+ */
 export const listDocumentsByFilters: UserRequestHandler = async (req, res, next) => {
   try {
     const { type, security_level, date_from, date_to } = await bodySchema.validateAsync(req.body)
