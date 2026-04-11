@@ -3,10 +3,12 @@ import { RequestHandler } from "express"
 import { AppDataSource } from "../../../AppDataSource"
 import { User } from "../../../entity/User"
 import { Token } from "../../../entity/Token"
-import bcrypt from "bcrypt"
+import bcrypt from "bcryptjs"
 import jwt from "jsonwebtoken"
 import Joi from "joi"
 import { TokenType } from "../../../lib/enums/tokenType.enum"
+import * as dotenv from "dotenv"
+dotenv.config()
 
 export const bodySchema = Joi.object({
   email: Joi.string().email().required(),
@@ -218,6 +220,9 @@ export const login: RequestHandler = async (req, res, next) => {
     accessToken.parent_token = refreshToken
 
     await AppDataSource.manager.save(Token, accessToken)
+
+    user.failed_login_attempts = 0
+    await AppDataSource.manager.save(user)
 
     return res.status(200).json({
       success: true,

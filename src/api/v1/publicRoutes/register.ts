@@ -1,7 +1,7 @@
 import { RequestHandler } from "express"
 import { AppDataSource } from "../../../AppDataSource"
 import { User } from "../../../entity/User"
-import bcrypt from "bcrypt"
+import bcrypt from "bcryptjs"
 import Joi from "joi"
 
 export const bodySchema = Joi.object({

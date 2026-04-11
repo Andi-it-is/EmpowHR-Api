@@ -5,6 +5,8 @@ import { UserRequest, UserRequestHandler } from "../classes/UserRequestHandler";
 import { User } from "../../entity/User";
 import { RoleName } from "../enums/acessControl.enum";
 import { RequestHandler } from "express";
+import * as dotenv from "dotenv"
+dotenv.config()
 
 
 // uses req.cookies.accessToken.  Alternatively but not implemented, one can use req.headers.authorization
