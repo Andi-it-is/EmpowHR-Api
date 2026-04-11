@@ -40,11 +40,13 @@ app.use(morgan(loggingFormat, {
 import versionRouter from "./api/versionRouter";
 app.use(versionRouter);
 
-// // static files & Vue Router fallback
-// app.use(express.static(path.join(__dirname, '../public')))
-// app.get('/{*path}', (req, res) => {
-//     res.sendFile(path.join(__dirname, '../public/index.html'))
-// })
+/**
+ * Express static serving
+ */
+app.use(express.static(path.join(__dirname, '../public')))
+app.get('/{*path}', (req, res) => {
+    res.sendFile(path.join(__dirname, '../public/index.html'))
+})
 
 import { AppDataSource } from "./AppDataSource";
 const PORT: string = process.env.PORT || "3000";
