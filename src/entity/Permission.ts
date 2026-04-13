@@ -10,7 +10,11 @@ export class Permission {
     @PrimaryGeneratedColumn('uuid')
     id: string
 
-    @Column({ nullable: false })
+    @Column({
+        type: 'enum',
+        enum: ExistingEntityNames,
+        nullable: false
+    })
     entity: ExistingEntityNames
 
     @Column({

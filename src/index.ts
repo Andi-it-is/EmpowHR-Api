@@ -1,122 +1,16 @@
-require("reflect-metadata"); // Must remain require at the very top
-require("dotenv").config();
-
-// express
-import express, { Request } from "express";
-import path from "path";
-const app = express();
-
-const cors = require('cors')
-
-let corsOptions = {
-    origin: process.env.CORS_ORIGIN,
-    optionsSuccessStatus: 200,
-    methods: ['GET', 'PUT', 'PATCH', 'POST', 'DELETE'],
-    credentials: true,
-    allowedHeaders: ['Content-Type', 'Authorization']
-}
-app.use(cors(corsOptions))
-
-import cookieParser from "cookie-parser";
-app.use(cookieParser());
-
-app.use(express.json())
-
-// // helmet
-import helmet from "helmet";
-app.use(
-    helmet({
-        contentSecurityPolicy: {
-            useDefaults: true, // Wir starten mit den sicheren Standards
-            directives: {
-                // 1. Erlaubt dem Browser, den PDF-Worker-Thread zu starten
-                "worker-src": ["'self'", "blob:"],
-
-                // 2. Erlaubt das Laden der PDF-Logik (auch als Blob/Data-URL)
-                "script-src": ["'self'", "'unsafe-inline'", "blob:", "data:"],
-
-                // 3. Deine bestehenden Einstellungen für Bilder und PDFs
-                "img-src": ["'self'", "data:", "blob:"],
-                "connect-src": ["'self'", "https://empowhr.andreasivanov.de"],
-
-                // 4. Falls du doch noch irgendwo ein Iframe nutzt (zur Sicherheit)
-                "frame-src": ["'self'", "blob:"],
-
-                // Damit Chrome nicht wegen 'data:' in script-src-elem meckert
-                "script-src-elem": ["'self'", "'unsafe-inline'", "blob:", "data:"],
-            },
-        },
-        // WICHTIG: Erlaubt das Laden von Ressourcen über verschiedene Ursprünge hinweg (Cross-Origin)
-        crossOriginEmbedderPolicy: false,
-    })
-);
-
-// setup logger
-import morgan from "morgan";
-
-const loggingFormat = ":date[iso] - :method - :url - Status :status - :response-time ms - :total-time ms - :res[content-length]";
-app.use(morgan(loggingFormat, {
-    skip: (req: Request) => {
-        return req.method === 'OPTIONS' || process.env.NODE_ENV == "test";
-    }
-}));
-
-// routes
-import versionRouter from "./api/versionRouter";
-app.use(versionRouter);
-
-/**
- * Express static serving
- */
-app.use(express.static(path.join(__dirname, '../public')))
-app.get('/{*path}', (req, res) => {
-    res.sendFile(path.join(__dirname, '../public/index.html'))
-})
-
+// src/index.ts
+import app from "./app";
 import { AppDataSource } from "./AppDataSource";
+
 const PORT: string = process.env.PORT || "3000";
-app.listen(PORT, async () => {
-    console.log('Timezone:', Intl.DateTimeFormat().resolvedOptions().timeZone);
-    await connectToDb();
-    console.log(`Backend started. Listening on port: ${PORT}`);
-});
 
-// swagger
-import swaggerUi from "swagger-ui-express";
-import swaggerJsdoc from "swagger-jsdoc";
-
-const swaggerOptions = {
-    definition: {
-        openapi: "3.0.0",
-        info: {
-            title: "EmpowHR API",
-            version: "1.0.0",
-            description: "API Dokumentation für EmpowHR",
-        },
-        servers: [
-            {
-                url: `http://localhost:${PORT}/api/v1`,
-                description: "Development Server",
-            },
-        ],
-    },
-    apis: [__dirname + "/api/v1/**/*.{js,ts}"],
-};
-
-const swaggerSpec = swaggerJsdoc(swaggerOptions);
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
-
-// Use the DataSource to initialize connection and run the Migrations
-const connectToDb = async (): Promise<any> => {
-
+const connectToDb = async (): Promise<void> => {
     for (let counter = 0; counter < 3; counter++) {
         try {
             await AppDataSource.initialize();
             break;
         } catch (error) {
-            if (counter == 2) {
-                throw error;
-            }
+            if (counter === 2) throw error;
             console.log("could not connect to db - retry in 3 sec (" + (counter + 1) + "/3)");
             await delay(3);
         }
@@ -128,8 +22,12 @@ const connectToDb = async (): Promise<any> => {
     await AppDataSource.runMigrations();
     console.log(`Migrations successful | ${env} | Backend ready`)
     console.log(`|--- Api Documentation is available under localhost:${PORT}/api-docs ---|`)
-
-    return;
 };
 
-const delay = (n: any) => new Promise(r => setTimeout(r, n * 1000));
+const delay = (n: number) => new Promise(r => setTimeout(r, n * 1000));
+
+app.listen(PORT, async () => {
+    console.log('Timezone:', Intl.DateTimeFormat().resolvedOptions().timeZone);
+    await connectToDb();
+    console.log(`Backend started. Listening on port: ${PORT}`);
+});

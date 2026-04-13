@@ -6,13 +6,16 @@
          "esnext.asynciterable",
          "DOM"
       ],
+      "types": [
+         "jest",
+         "node"
+      ],
       "typeRoots": [
          "node_modules/@types"
       ],
       "target": "es6",
       "module": "commonjs",
-      // "moduleResolution": "node",
-      "rootDir": "./src",
+      "rootDir": ".",
       "outDir": "./dist",
       "emitDecoratorMetadata": true,
       "experimentalDecorators": true,
@@ -23,6 +26,11 @@
       "strictFunctionTypes": false
    },
    "include": [
-      "src/**/*.ts"
-   ]
+      "src/**/*.ts",
+      "test/**/*.ts",
+      "jest.config.ts"
+   ],
+   "ts-node": { // <-- damit jest.config.ts ausführbar ist
+      "transpileOnly": true
+   }
 }
