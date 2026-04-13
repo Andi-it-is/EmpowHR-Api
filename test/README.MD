@@ -14,7 +14,7 @@ Visual Studio Code
 
 1. Installiere die benötigten Pakete mit `npm install`.
 2. Starte das Backend mit `npm run dev`.
-3. In PgAdmin muss eine Servergruppe > Server > Datenbank exisiteren. Die Datenbank muss den selben Namen haben, der in der .env.test hinterlegt ist. 
+3. In PgAdmin muss eine Servergruppe > Server > Datenbank exisiteren. Die Datenbank muss den selben Namen haben, der in der .env.test hinterlegt ist. Siehe Screenshot
 3. Folge dem Link, welcher in der Konsole angezeigt wird => |--- localhost:3000/api-docs ---| 
 4. Dort sind Routen hinterlegt, welche einen Swagger Dokumentationskommentar besitzen.
 
@@ -29,6 +29,7 @@ Falls Routen komplexer sind und es mehrere Wege gibt einen bestimmten Fehlercode
 1. Factory bauen. In /test/factories sind Fabriken von der Entitäten. Das sind quasi vorausgefüllte Initialisierungen einer solchen Enität (siehe /src/entity).
 2. Route bauen. In /test/routes/{variable} sind die Routen hinterlegt. Die Struktur ist die selbe, wie bei der offiziellen API (siehe /src/api/v1).
 3. Test schreiben :D
+4. Tests ausführen mit ``` npm run test ``` 
 
 
 ## Hilfreiches im Aufbau der "Testanfrage"
