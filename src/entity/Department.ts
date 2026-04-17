@@ -19,6 +19,14 @@ export class Department {
     @UpdateDateColumn()
     updated_at: Date
 
+    // Der Abteilungsleiter
+    @ManyToOne(() => User, (user) => user.ledDepartments, {
+        nullable: true, // Falls eine Abteilung temporär keinen Leiter hat
+        onDelete: 'SET NULL' // Wenn der User gelöscht wird, bleibt die Abteilung bestehen
+    })
+    @JoinColumn({ name: 'head_id' }) // Optional: Benennt die Spalte in der DB explizit
+    head: User;
+
     // Self-referencing for Hierarchy
     @ManyToOne(() => Department, department => department.children, { nullable: true })
     parent: Department
