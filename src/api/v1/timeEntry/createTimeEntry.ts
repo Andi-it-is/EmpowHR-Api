@@ -5,6 +5,8 @@ import { UserTimeAccount } from "../../../entity/UserTimeAccount"
 import { WorkingLocation, TimeEntryType } from "../../../lib/enums/timeRecording.enum"
 import Joi from 'joi'
 import { Between } from "typeorm"
+import { calculateTimeEntryHours } from "../../../lib/utils/timeCalculations"
+
 
 const bodySchema = Joi.object({
   start_date: Joi.string().isoDate().required(),
@@ -18,7 +20,13 @@ const bodySchema = Joi.object({
  * /timeEntry/my/create:
  *   post:
  *     summary: Zeiteintrag erstellen
- *     description: Erstellt einen neuen Zeiteintrag für den eingeloggten Benutzer.
+ *     description: |
+ *       Erstellt einen neuen Zeiteintrag für den eingeloggten Benutzer.
+ *       Pausenzeiten werden automatisch nach §4 ArbZG berechnet:
+ *       - Ab 6h Arbeitszeit: 30 Minuten Pflichtpause
+ *       - Ab 9h Arbeitszeit: 45 Minuten Pflichtpause
+ *       - Maximal 10h 45min Gesamtarbeitszeit (§3 ArbZG)
+ *       - Pro Tag ist nur ein Zeiteintrag erlaubt
  *     tags:
  *       - TimeEntries
  *     requestBody:
@@ -36,31 +44,123 @@ const bodySchema = Joi.object({
  *                 type: string
  *                 format: date-time
  *                 example: "2026-04-19T09:00:00.000Z"
+ *                 description: Startzeitpunkt des Eintrags als ISO 8601 Datum mit Uhrzeit
  *               end_date:
  *                 type: string
  *                 format: date-time
  *                 example: "2026-04-19T17:00:00.000Z"
+ *                 description: Endzeitpunkt des Eintrags als ISO 8601 Datum mit Uhrzeit
  *               working_location:
  *                 type: string
  *                 enum: [OFFICE, REMOTE, FIELD_SERVICE]
  *                 example: "OFFICE"
+ *                 description: Arbeitsort des Eintrags
  *               type:
  *                 type: string
  *                 enum: [WORK, VACATION, SICK, SICK_CHILD, EDUCATION, PUBLIC_HOLIDAY, COMPENSATORY_OFF, SPECIAL_LEAVE, PARENTAL_LEAVE, UNPAID_LEAVE, ON_CALL]
  *                 default: WORK
- *               interruption_hours:
- *                 type: number
- *                 default: 0
- *                 example: 0.5
+ *                 description: |
+ *                   Art des Zeiteintrags. Bei Abwesenheiten (nicht WORK) werden
+ *                   recorded_hours automatisch aus dem Vertrag berechnet (contract_hours_per_week / working_days_per_week)
  *     responses:
  *       201:
  *         description: Zeiteintrag erfolgreich erstellt
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                       format: uuid
+ *                       example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+ *                     start_date:
+ *                       type: string
+ *                       format: date-time
+ *                     end_date:
+ *                       type: string
+ *                       format: date-time
+ *                     working_location:
+ *                       type: string
+ *                       enum: [OFFICE, REMOTE, FIELD_SERVICE]
+ *                     type:
+ *                       type: string
+ *                       enum: [WORK, VACATION, SICK, SICK_CHILD, EDUCATION, PUBLIC_HOLIDAY, COMPENSATORY_OFF, SPECIAL_LEAVE, PARENTAL_LEAVE, UNPAID_LEAVE, ON_CALL]
+ *                     interruption_hours:
+ *                       type: number
+ *                       description: Automatisch berechnete Pausenzeit nach §4 ArbZG
+ *                       example: 0.5
+ *                     recorded_hours:
+ *                       type: number
+ *                       description: Tatsächlich anrechenbare Arbeitsstunden nach Abzug der Pausen
+ *                       example: 7.5
+ *                     is_confirmed:
+ *                       type: boolean
+ *                       description: Arbeitseinträge (WORK) sind automatisch bestätigt
+ *                       example: true
+ *                     created_at:
+ *                       type: string
+ *                       format: date-time
  *       400:
- *         description: Validierungsfehler
+ *         description: Validierungsfehler oder Enddatum vor Startdatum
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Das Enddatum muss nach dem Startdatum liegen."
  *       404:
- *         description: Kein Zeitkonto gefunden
+ *         description: Kein Zeitkonto für den Benutzer gefunden
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Kein Zeitkonto für diesen Benutzer gefunden."
+ *       409:
+ *         description: Für diesen Tag existiert bereits ein Zeiteintrag
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Für diesen Tag existiert bereits ein Zeiteintrag."
+ *       422:
+ *         description: Maximale Arbeitszeit überschritten
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Ein Arbeitstag darf maximal 10 Stunden und 45 Minuten umfassen (§3 ArbZG)."
  *       500:
- *         description: Serverfehler
+ *         description: Interner Serverfehler
  */
 export const createTimeEntry: UserRequestHandler = async (req, res, next) => {
   try {
@@ -108,58 +208,7 @@ export const createTimeEntry: UserRequestHandler = async (req, res, next) => {
       })
     }
 
-    //- Deutsche Arbeitszeiten Berechnungen
-    const calculateWorkHours = (
-      start: Date,
-      end: Date,
-    ): { recorded_hours: number; interruption_hours: number } => {
-      const total_hours = (end.getTime() - start.getTime()) / 1000 / 60 / 60
-
-      let interruption_hours = 0
-      let recorded_hours = total_hours
-
-      if (total_hours > 6 && total_hours <= 6.5) {
-        // Über 6h aber weniger als 6.5h → Überschuss wird Pause
-        interruption_hours = total_hours - 6
-        recorded_hours = 6
-      } else if (total_hours > 6.5 && total_hours <= 9) {
-        // Pflichtpause 30min greift
-        interruption_hours = 0.5
-        recorded_hours = total_hours - 0.5
-      } else if (total_hours > 9 && total_hours <= 9.5) {
-        // Über 9h aber weniger als 9.5h → Überschuss wird zusätzliche Pause
-        interruption_hours = 0.5 + (total_hours - 9)
-        recorded_hours = 9
-      } else if (total_hours > 9.5 && total_hours <= 10) {
-        // Pflichtpause 45min greift
-        interruption_hours = 0.75
-        recorded_hours = total_hours - 0.75
-      } else if (total_hours > 10) {
-        // Maximum: 10h recorded, 45min Pause
-        interruption_hours = 0.75
-        recorded_hours = Math.min(total_hours - 0.75, 10)
-      }
-
-      return {
-        recorded_hours: Math.round(recorded_hours * 100) / 100,
-        interruption_hours: Math.round(interruption_hours * 100) / 100,
-      }
-    }
-
-    const calculateAbsenceHours = (
-      timeAccount: UserTimeAccount,
-    ): { recorded_hours: number; interruption_hours: number } => {
-      const recorded_hours = timeAccount.contract_hours_per_week / timeAccount.working_days_per_week
-      return {
-        recorded_hours: Math.round(recorded_hours * 100) / 100,
-        interruption_hours: 0,
-      }
-    }
-
-    const isWork = body.type === TimeEntryType.WORK
-    const { recorded_hours, interruption_hours } = isWork
-      ? calculateWorkHours(start, end)
-      : calculateAbsenceHours(timeAccount)
+    const { recorded_hours, interruption_hours } = calculateTimeEntryHours(body.type, start, end, timeAccount)
 
     // Working hours do not need approval by default
     let confirmStatus = false
@@ -189,13 +238,6 @@ export const createTimeEntry: UserRequestHandler = async (req, res, next) => {
 
     await AppDataSource.getRepository(TimeEntry).save(timeEntry)
 
-    const sollPerDay = timeAccount.contract_hours_per_week / timeAccount.working_days_per_week
-    const delta = recorded_hours - sollPerDay
-
-    await AppDataSource.getRepository(UserTimeAccount).update(
-      { id: timeAccount.id },
-      { delta_hours: timeAccount.delta_hours + delta }
-    )
 
     return res.status(201).json({
       success: true,

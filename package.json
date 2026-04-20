@@ -25,6 +25,7 @@
     "cors": "^2.8.6",
     "dayjs": "^1.11.19",
     "express": "^5.2.1",
+    "feiertagejs": "^1.5.1",
     "helmet": "^8.1.0",
     "joi": "^18.1.2",
     "jsonwebtoken": "^9.0.3",
