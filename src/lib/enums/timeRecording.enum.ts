@@ -1,7 +1,7 @@
 export enum WorkingLocation {
   OFFICE = 'OFFICE',                      // Büro
   REMOTE = 'REMOTE',                      // Remote
-  FIELD_SERVICE = 'FIELD_SERVICE'         // Dienstreise
+  FIELD_SERVICE = 'FIELD_SERVICE',        // Dienstreise
 }
 
 export enum TimeEntryType {
@@ -15,5 +15,5 @@ export enum TimeEntryType {
   SPECIAL_LEAVE = 'SPECIAL_LEAVE',        // Sonderurlaub (Hochzeit, Todesfall etc.)
   PARENTAL_LEAVE = 'PARENTAL_LEAVE',      // Elternzeit
   UNPAID_LEAVE = 'UNPAID_LEAVE',          // Unbezahlter Urlaub
-  ON_CALL = 'ON_CALL',                    // Bereitschaftsdienst
+  // ON_CALL = 'ON_CALL',                    // Bereitschaftsdienst
 }

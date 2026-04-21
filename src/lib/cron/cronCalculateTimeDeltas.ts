@@ -5,6 +5,7 @@ import { updateDeltaHours } from "../utils/updateDeltaHours"
 import { isHoliday } from 'feiertagejs'
 import { LessThanOrEqual, Between } from "typeorm"
 import { RequestHandler } from "express"
+import { TimeEntryType } from "../enums/timeRecording.enum"
 
 export const dailyDeltaCron: RequestHandler = async (req, res, next) => {
   try {
@@ -40,8 +41,12 @@ export const dailyDeltaCron: RequestHandler = async (req, res, next) => {
       })
 
       if (!existingEntry) {
-        await updateDeltaHours(account, 0)
-        processed++
+
+        if (existingEntry!.type === TimeEntryType.COMPENSATORY_OFF) {
+
+          await updateDeltaHours(account, 0)
+          processed++
+        }
       }
     }
 

@@ -24,7 +24,7 @@ const toEndOfDay = (dateStr: string): Date => {
 
 /**
  * @swagger
- * /time-entry/my/filter:
+ * /timeEntry/my/filter:
  *   post:
  *     summary: Zeiteinträge gefiltert abrufen
  *     description: Gibt Zeiteinträge des eingeloggten Benutzers gefiltert nach Arbeitsort, Typ, Zeitraum und Bestätigungsstatus zurück.
@@ -142,6 +142,7 @@ export const listTimeEntriesByFilters: UserRequestHandler = async (req, res, nex
       success: true,
       data: timeEntries,
       shouldWorkHoursPerDay: shouldWorkHoursPerDay,
+      vacationDaysPerYear: timeAccount.vacation_days_per_year,
       timeAccount: timeAccount
     })
 

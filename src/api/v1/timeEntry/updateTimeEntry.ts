@@ -4,7 +4,7 @@ import { TimeEntry } from "../../../entity/TimeEntry"
 import { UserTimeAccount } from "../../../entity/UserTimeAccount"
 import { WorkingLocation, TimeEntryType } from "../../../lib/enums/timeRecording.enum"
 import Joi from 'joi'
-import { Between } from "typeorm"
+import { LessThan, MoreThan, Not } from "typeorm"
 import { calculateTimeEntryHours } from "../../../lib/utils/timeCalculations"
 
 const paramSchema = Joi.object({
@@ -14,7 +14,7 @@ const paramSchema = Joi.object({
 const bodySchema = Joi.object({
   start_date: Joi.string().isoDate().required(),
   end_date: Joi.string().isoDate().required(),
-  working_location: Joi.string().valid(...Object.values(WorkingLocation)).required(),
+  working_location: Joi.string().valid(...Object.values(WorkingLocation)).optional().allow(null),   // null working location => abscence
   type: Joi.string().valid(...Object.values(TimeEntryType)).optional(),
 })
 
@@ -93,7 +93,7 @@ export const updateTimeEntry: UserRequestHandler = async (req, res, next) => {
     }
 
     const total_hours = (end.getTime() - start.getTime()) / 1000 / 60 / 60
-    if (total_hours > 10.75) {
+    if (total_hours > 10.75 && body.working_location !== null) {
       return res.status(422).json({
         success: false,
         message: 'Ein Arbeitstag darf maximal 10 Stunden und 45 Minuten umfassen (§3 ArbZG).',
@@ -130,15 +130,19 @@ export const updateTimeEntry: UserRequestHandler = async (req, res, next) => {
 
     const conflictingEntry = await AppDataSource.getRepository(TimeEntry).findOne({
       where: {
+        id: Not(id),
         time_account: { id: timeAccount.id },
-        start_date: Between(startOfDay, endOfDay),
+        start_date: LessThan(end),
+        end_date: MoreThan(start),
       }
     })
 
-    if (conflictingEntry && conflictingEntry.id !== id) {
+    if (conflictingEntry &&
+      conflictingEntry.type !== TimeEntryType.PUBLIC_HOLIDAY &&
+      body.type !== TimeEntryType.PUBLIC_HOLIDAY) {
       return res.status(409).json({
         success: false,
-        message: 'Für diesen Tag existiert bereits ein anderer Zeiteintrag.',
+        message: 'Der Zeitraum überschneidet sich mit einem bestehenden Eintrag.',
       })
     }
 

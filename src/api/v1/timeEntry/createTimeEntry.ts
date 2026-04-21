@@ -4,14 +4,14 @@ import { TimeEntry } from "../../../entity/TimeEntry"
 import { UserTimeAccount } from "../../../entity/UserTimeAccount"
 import { WorkingLocation, TimeEntryType } from "../../../lib/enums/timeRecording.enum"
 import Joi from 'joi'
-import { Between } from "typeorm"
+import { LessThan, MoreThan, Not } from "typeorm"
 import { calculateTimeEntryHours } from "../../../lib/utils/timeCalculations"
 
 
 const bodySchema = Joi.object({
   start_date: Joi.string().isoDate().required(),
   end_date: Joi.string().isoDate().required(),
-  working_location: Joi.string().valid(...Object.values(WorkingLocation)).required(),
+  working_location: Joi.string().valid(...Object.values(WorkingLocation)).optional().allow(null),   // null working location => abscence
   type: Joi.string().valid(...Object.values(TimeEntryType)).optional().default(TimeEntryType.WORK),
 })
 
@@ -176,6 +176,18 @@ export const createTimeEntry: UserRequestHandler = async (req, res, next) => {
       })
     }
 
+    if (body.type === TimeEntryType.VACATION) {
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+
+      if (start < today) {
+        return res.status(400).json({
+          success: false,
+          message: 'Urlaubseinträge können nicht in der Vergangenheit erstellt werden.',
+        })
+      }
+    }
+
     const timeAccount = await AppDataSource.getRepository(UserTimeAccount).findOne({
       where: { user: { id: req.user.id } },
     })
@@ -194,17 +206,19 @@ export const createTimeEntry: UserRequestHandler = async (req, res, next) => {
     const endOfDay = new Date(start)
     endOfDay.setHours(23, 59, 59, 999)
 
-    const existingEntry = await AppDataSource.getRepository(TimeEntry).findOne({
+    const conflictingEntry = await AppDataSource.getRepository(TimeEntry).findOne({
       where: {
         time_account: { id: timeAccount.id },
-        start_date: Between(startOfDay, endOfDay),
+        start_date: LessThan(end),
+        end_date: MoreThan(start),
+        type: TimeEntryType.WORK
       }
     })
 
-    if (existingEntry) {
+    if (conflictingEntry) {
       return res.status(409).json({
         success: false,
-        message: 'Für diesen Tag existiert bereits ein Zeiteintrag.',
+        message: 'Der Zeitraum überschneidet sich mit einem bestehenden Arbeitszeit Eintrag.',
       })
     }
 
@@ -218,7 +232,7 @@ export const createTimeEntry: UserRequestHandler = async (req, res, next) => {
 
     const total_hours = (end.getTime() - start.getTime()) / 1000 / 60 / 60
 
-    if (total_hours > 10.75) {
+    if (total_hours > 10.75 && body.type === TimeEntryType.WORK) {
       return res.status(422).json({
         success: false,
         message: 'Ein Arbeitstag darf maximal 10 Stunden und 45 Minuten umfassen (§3 ArbZG).',
