@@ -176,6 +176,33 @@ export const createTimeEntry: UserRequestHandler = async (req, res, next) => {
       })
     }
 
+    const toLocalTime = (date: Date) =>
+      date.toLocaleTimeString('de-DE', {
+        timeZone: 'Europe/Berlin',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+      })
+
+    const isFullDay = toLocalTime(start) === '00:00' && toLocalTime(end) === '23:59'
+
+    // Fortbidlung und Sonderurlaub sind die einzigen 2 Arten, Ganztägige Abwesenheiten nicht verpflichten
+    const FULL_DAY_ONLY_TYPES = [
+      TimeEntryType.VACATION,
+      TimeEntryType.SICK,
+      TimeEntryType.SICK_CHILD,
+      TimeEntryType.PUBLIC_HOLIDAY,
+      TimeEntryType.PARENTAL_LEAVE,
+      TimeEntryType.UNPAID_LEAVE,
+    ]
+
+    if (FULL_DAY_ONLY_TYPES.includes(body.type) && !isFullDay) {
+      return res.status(400).json({
+        success: false,
+        message: `Dieser Abwesenheitstyp kann nur ganztägig gebucht werden.`,
+      })
+    }
+
     if (body.type === TimeEntryType.VACATION) {
       const today = new Date()
       today.setHours(0, 0, 0, 0)
@@ -211,14 +238,14 @@ export const createTimeEntry: UserRequestHandler = async (req, res, next) => {
         time_account: { id: timeAccount.id },
         start_date: LessThan(end),
         end_date: MoreThan(start),
-        type: TimeEntryType.WORK
+        type: Not(TimeEntryType.PUBLIC_HOLIDAY)
       }
     })
 
     if (conflictingEntry) {
       return res.status(409).json({
         success: false,
-        message: 'Der Zeitraum überschneidet sich mit einem bestehenden Arbeitszeit Eintrag.',
+        message: 'Der Zeitraum überschneidet sich mit einem bestehenden Eintrag.',
       })
     }
 

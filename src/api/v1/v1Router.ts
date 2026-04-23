@@ -8,6 +8,7 @@ import changeLogRouter from "./chnageLogHistory/router";
 import documentRouter from "./document/router";
 import certificateRouter from "./certificate/router";
 import timeEntryRouter from "./timeEntry/router";
+import userTimeAccountRouter from "./userTimeAccount/router";
 
 const router = Router()
 
@@ -25,5 +26,5 @@ router.use("/document", documentRouter)
 router.use("/timeEntry", timeEntryRouter)
 router.use("/user", userRouter)
 router.use("/userMasterData", userMasterDataRouter)
-
+router.use("/userTimeAccount", userTimeAccountRouter)
 export default router;
