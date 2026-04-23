@@ -32,6 +32,11 @@ Die Branches sind nummeriert, so wie `1-test-ready-api-iteration-1`.
 
    ![Ordner öffnen](/assets/image-03.png)
 
+
+7.1 Vergewisser dich, dass du auf dem Feature Branch bist!
+
+   ![Ordner öffnen](/assets/image-03-01.png)
+
 8. Erstelle ein Terminal
 
    ![Terminal öffnen](/assets/image-04.png)
