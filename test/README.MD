@@ -26,15 +26,15 @@ Die Branches sind nummeriert, so wie `1-test-ready-api-iteration-1`.
 5. In dein gewünschtes Verzeichnis navigieren
 6. Den Befehl `git clone URL_DIE_DU_KOPIERT_HAST` eingeben und mit Enter bestätigen
 
-   ![Windows Terminal öffnen und Projekt clonen](./assets/image-02.png)
+   ![Windows Terminal öffnen und Projekt clonen](/assets/image-02.png)
 
 7. Öffne Das Projekt in Visual Studio Code (Ordner auswählen)
 
-   ![Ordner öffnen](./assets/image-03.png)
+   ![Ordner öffnen](/assets/image-03.png)
 
 8. Erstelle ein Terminal
 
-   ![Terminal öffnen](./assets/image-04.png)
+   ![Terminal öffnen](/assets/image-04.png)
 
 9. Im Terminal: Installiere die benötigten Pakete mit `npm install`.
 10. Starte das Backend mit `npm run dev`.
@@ -42,18 +42,18 @@ Die Branches sind nummeriert, so wie `1-test-ready-api-iteration-1`.
 
 12. In PgAdmin muss eine Servergruppe > Server > Datenbank exisiteren. Die Datenbank muss den selben Namen haben, der in der Datei `.env.test` unter `DB_NAME` hinterlegt ist.
 
-    ![Pg Admin öffnen und Server Gruppe erstellen](./assets/image-05.png)
+    ![Pg Admin öffnen und Server Gruppe erstellen](/assets/image-05.png)
 
-    ![Name eingeben](./assets/image-06.png)
+    ![Name eingeben](/assets/image-06.png)
 
 13. localhost und Das Password `postgres` eingeben.
 14. Ändere bei dir in der `.env.test` das `DB_PASS` auch zu `postgres`.
 
-    ![Host und Password eingeben](./assets/image-07.png)
+    ![Host und Password eingeben](/assets/image-07.png)
 
 15. Speichern und erstellen
 
-    ![Datenbank auswählen](./assets/image-08.png)
+    ![Datenbank auswählen](/assets/image-08.png)
 
 16. Unter `Servers > test_empowhr_test > Databases > test_empowhr_test > Schemas > public > Tables` findest du die Tabellen der Datenbank.
 17. Mit Rechstklick auf `public` kannst du `ERD for Schema` dir anzeigen lassen.
@@ -61,11 +61,11 @@ Die Branches sind nummeriert, so wie `1-test-ready-api-iteration-1`.
 
 19. Folge dem Link, welcher in der Konsole angezeigt wird `localhost:3000/api-docs`. Oder gebe den in deinen Browser des Vertrauens ein.
 
-    ![Swagger Link folgen](./assets/image-09.png)
+    ![Swagger Link folgen](/assets/image-09.png)
 
 20. Dort sind Routen hinterlegt, welche einen Swagger Dokumentationskommentar besitzen. Da werden die Routen erklärt.
 
-    ![Swagger](./assets/image-10.png)
+    ![Swagger](/assets/image-10.png)
 
 ## Auftrag
 
@@ -80,6 +80,8 @@ Falls Routen komplexer sind und es mehrere Wege gibt einen bestimmten Fehlercode
 3. Test schreiben :D
 4. Tests ausführen mit ``` npm run test ``` 
 
+## Du bist fertig?
+Dann commite deinen Code auf den Feature Branch
 
 ## Hilfreiches im Aufbau der "Testanfrage"
 
