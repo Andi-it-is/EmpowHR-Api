@@ -17,7 +17,8 @@
     "migration:generate:dev": "NODE_ENV=development typeorm-ts-node-commonjs migration:generate src/migration/postgres/Migration -d src/AppDataSource.ts",
     "migration:generate:prod": "NODE_ENV=production typeorm-ts-node-commonjs migration:generate src/migration/mysql/Migration -d src/AppDataSource.ts",
     "migration:run:dev": "NODE_ENV=development typeorm-ts-node-commonjs migration:run -d src/AppDataSource.ts",
-    "migration:run:prod": "NODE_ENV=production typeorm-ts-node-commonjs migration:run -d src/AppDataSource.ts"
+    "migration:run:prod": "NODE_ENV=production typeorm-ts-node-commonjs migration:run -d src/AppDataSource.ts",
+    "seed:roles": "ts-node src/seeds/rolePermissionSeed.ts"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",

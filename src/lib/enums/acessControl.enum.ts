@@ -11,7 +11,7 @@ export enum DocumentType {
 export enum DocumentSecurityLevel {
   RESTRICTED = 1,            // Dienstgebrauch — alle im Unternehmen
   CONFIDENTIAL = 2,          // Vertraulich — nur Abteilung
-  SECRET = 3,                // Geheim — ich, HR, Chef
+  SECRET = 3,                // Geheim — ich, HR, Chef, Buchhaltung
   TOP_SECRET = 4             // Sehr Geheim — nur ich und HR
 }
 
@@ -44,6 +44,7 @@ export enum RoleName {
   DEPARTMENT_HEAD = 'DEPARTMENT_HEAD',      // Abteilungsleiter (Ist auch direkter Supervisor eines Mitarbeiters)
   HR_MANAGER = 'HR_MANAGER',                // Personalreferent. Erstellt auch Mitarbeiter
   ACCOUNTANT = 'ACCOUNTANT',                // Buchhaltung
+  DEMO = 'DEMO',                            // Demo Account. Hat alle Permissions, aber nur read-only
 
   IT_ADMINISTRATOR = 'IT_ADMINISTRATOR',    // IT Admin
   EXECUTIVE = 'EXECUTIVE',                  // Geschäftsführung
@@ -58,58 +59,6 @@ export enum RoleName {
  * ACCOUNTANT 3 - SECRET
  * IT_ADMINISTRATOR 2 — CONFIDENTIAL
  * EXECUTIVE 4 — TOP_SECRET
- */
-
-
-/**
- * User mit all seinen Rollen
- * SELECT *
-    FROM public.user u
-    LEFT JOIN user_roles_role urr ON u.id = urr."userId"
-    LEFT JOIN role r ON r.id = urr."roleId"
-    WHERE u.id = 'f13ccdb4-be5f-4d16-800b-b51ad1cac1cd';
- */
-
-/**
- * Rolle mit all seinen Usern.
- * SELECT * 
-    FROM role r
-    LEFT JOIN user_roles_role urr ON r.id = urr."roleId"
-    LEFT JOIN "user" u ON u.id = urr."userId"
-    WHERE r.id = '079c1539-377c-49c2-9302-487710a266d9';
- */
-
-/**
- * Rolle mit all seinen Permissions
- * SELECT
-    r.id AS role_id,
-    r.name AS role_name,
-    r.max_security_level,
-    p.id AS permission_id,
-    p.entity,
-    p.action,
-    p.scope
-    FROM role r
-    LEFT JOIN role_permissions_permission rpp ON r.id = rpp."roleId"
-    LEFT JOIN permission p ON p.id = rpp."permissionId"
-    WHERE r.id = 'myString';
- */
-
-/**
- * Permission, die in all diesen Rollen vorhanden ist.
- * 
- * SELECT
-    p.id AS permission_id,
-    p.entity,
-    p.action,
-    p.scope,
-    r.id AS role_id,
-    r.name AS role_name,
-    r.max_security_level
-    FROM permission p
-    LEFT JOIN role_permissions_permission rpp ON p.id = rpp."permissionId"
-    LEFT JOIN role r ON r.id = rpp."roleId"
-    WHERE p.id = 'myString';
  */
 
 export enum ExistingEntityNames {

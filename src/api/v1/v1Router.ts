@@ -9,6 +9,8 @@ import documentRouter from "./document/router";
 import certificateRouter from "./certificate/router";
 import timeEntryRouter from "./timeEntry/router";
 import userTimeAccountRouter from "./userTimeAccount/router";
+import rolesRouter from "./role/router";
+import permissionRouter from "./permission/router";
 
 const router = Router()
 
@@ -23,6 +25,8 @@ router.use(contextMiddleware)
 router.use("/changelog", changeLogRouter)
 router.use("/certificate", certificateRouter)
 router.use("/document", documentRouter)
+router.use("/permission", permissionRouter)
+router.use("/role", rolesRouter)
 router.use("/timeEntry", timeEntryRouter)
 router.use("/user", userRouter)
 router.use("/userMasterData", userMasterDataRouter)
