@@ -20,7 +20,7 @@ Die Branches sind nummeriert, so wie `1-test-ready-api-iteration-1`.
 2. Code auswählen
 3. URL Kopieren
 
-   ![Link aus Github einfügen](./assets/image-01.png)
+   ![Link aus Github einfügen](/assets/image-01.png)
 
 4. In windows ein neues Terminal öffnen
 5. In dein gewünschtes Verzeichnis navigieren
