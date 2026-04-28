@@ -11,6 +11,7 @@ import timeEntryRouter from "./timeEntry/router";
 import userTimeAccountRouter from "./userTimeAccount/router";
 import rolesRouter from "./role/router";
 import permissionRouter from "./permission/router";
+import departmentRouter from "./department/router";
 
 const router = Router()
 
@@ -24,6 +25,7 @@ router.use(contextMiddleware)
 
 router.use("/changelog", changeLogRouter)
 router.use("/certificate", certificateRouter)
+router.use("/department", departmentRouter)
 router.use("/document", documentRouter)
 router.use("/permission", permissionRouter)
 router.use("/role", rolesRouter)

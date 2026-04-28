@@ -24,7 +24,7 @@ export class Department {
         nullable: true, // Falls eine Abteilung temporär keinen Leiter hat
         onDelete: 'SET NULL' // Wenn der User gelöscht wird, bleibt die Abteilung bestehen
     })
-    @JoinColumn({ name: 'head_id' }) // Optional: Benennt die Spalte in der DB explizit
+    @JoinColumn({ name: 'headId' })
     head: User;
 
     // Self-referencing for Hierarchy

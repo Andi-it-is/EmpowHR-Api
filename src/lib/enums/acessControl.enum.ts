@@ -38,6 +38,15 @@ export enum ChangeLogAction {
   DELETE = 'DELETE'
 }
 
+export enum DepartmentName {
+  SALES = 'Sales',
+  LEGAL = 'Rechtsabteilung',
+  MARKETING = 'Marketing',
+  IT = 'IT',
+  HR = 'Human Ressources',
+  EXECUTIVE = 'Geschäftsführung',
+  FINANCE = 'Finance',
+}
 
 export enum RoleName {
   EMPLOYEE = 'EMPLOYEE',                    // Mitarbeiter

@@ -4,6 +4,9 @@ import { AppDataSource } from "../AppDataSource"
 import { Role } from "../entity/Role"
 import { Permission } from "../entity/Permission"
 import { RoleName, DocumentSecurityLevel, PermissionAction, PermissionScope, ExistingEntityNames } from "../lib/enums/acessControl.enum"
+import { Department } from "../entity/Department"
+import { DepartmentName } from "../lib/enums/acessControl.enum"
+
 
 /**
  ** A Seeder is a once-fill-in Script that fills hardcoded db entries into the database
@@ -117,6 +120,17 @@ const roles: { name: RoleName, max_security_level: DocumentSecurityLevel, scope:
   { name: RoleName.EXECUTIVE, max_security_level: DocumentSecurityLevel.CONFIDENTIAL, scope: PermissionScope.ALL },
 ]
 
+
+const departments: { name: DepartmentName, cost_center: string }[] = [
+  { name: DepartmentName.EXECUTIVE, cost_center: 'CX_1000' },
+  { name: DepartmentName.LEGAL, cost_center: 'CX_2000' },
+  { name: DepartmentName.FINANCE, cost_center: 'CX_3000' },
+  { name: DepartmentName.IT, cost_center: 'CX_4000' },
+  { name: DepartmentName.HR, cost_center: 'CX_5000' },
+  { name: DepartmentName.MARKETING, cost_center: 'CX_6000' },
+  { name: DepartmentName.SALES, cost_center: 'CX_7000' },
+]
+
 async function seed() {
   await AppDataSource.initialize()
   console.log('🌱 Seeding gestartet...')
@@ -148,6 +162,20 @@ async function seed() {
       console.log(`  ✓ ${r.name}`)
     } else {
       console.log(`  – ${r.name} (bereits vorhanden)`)
+    }
+  }
+
+  // Departments upserten
+  console.log('\n🏢 Departments werden eingefügt...')
+  const departmentRepo = AppDataSource.getRepository(Department)
+
+  for (const d of departments) {
+    const existing = await departmentRepo.findOne({ where: { name: d.name } })
+    if (!existing) {
+      await departmentRepo.save(departmentRepo.create(d))
+      console.log(`  ✓ ${d.name}`)
+    } else {
+      console.log(`  – ${d.name} (bereits vorhanden)`)
     }
   }
 

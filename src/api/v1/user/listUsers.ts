@@ -52,13 +52,15 @@ export const listAllUsers: UserRequestHandler = async (req, res, next) => {
           firstname: true,
           lastname: true,
           email: true,
+          disabled: true
         },
         relations: {
           department: true,
           roles: true
         },
         order: {
-          created_at: "ASC",
+          firstname: "ASC",
+          lastname: "ASC",
         }
       })
 
