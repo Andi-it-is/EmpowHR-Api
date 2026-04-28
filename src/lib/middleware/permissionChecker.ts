@@ -2,64 +2,55 @@ import { APIError } from "../classes/APIError";
 import { UserRequest, UserRequestHandler } from "../classes/UserRequestHandler";
 import { NextFunction } from "express";
 import { resolvePermissionsAsUniqueArray, resolveRoles } from "./resolveRolesPermissions";
+import { ExistingEntityNames, PermissionAction, PermissionScope } from "../enums/acessControl.enum";
 
-export const permissionChecker = (input: any) => {
 
+/**
+ * example call
+ * userRouter.get(
+ *  '/all',  
+ *  permissionChecker(ExistingEntityNames.USER, PermissionAction.READ, PermissionScope.SELF), 
+ *  listAllUsers
+ * )
+ *
+ * @param entity The name of an entity found in "ExistingEntityNames" enum
+ * @param action The name of an action found in "PermissionAction" enum
+ * @param requiredScope The name of a scope found in "PermissionScope" enum
+ * @returns 403 if the user is not allowed to request the ressource. passthrough if the user is allowed
+ */
+export const permissionChecker = (
+  entity: ExistingEntityNames,
+  action: PermissionAction,
+  requiredScope: PermissionScope
+) => {
   return async (req: UserRequest, res: any, next: NextFunction): Promise<any> => {
 
-    next()
-    return "hi"
-    const rolesWithPermissions = await resolveRoles(req.user.id)
-    //! check if permissions exist. for now, console logs are disabled
-    // console.log(JSON.stringify(rolesWithPermissions, null, 2))
-    // console.log("&& \n \n")
-
-
     const uniquePermissions = await resolvePermissionsAsUniqueArray(req.user.id)
-    // console.log("&&&\n \n ", uniquePermissions, " \n \n %%%")
-    // console.log(JSON.stringify(uniquePermissions, null, 2))
-    return rolesWithPermissions
 
-    // const hasPermission = _checkPermission(input, rolesWithPermissions);
+    const scopeStrength: Record<PermissionScope, number> = {
+      [PermissionScope.ALL]: 4,
+      [PermissionScope.DEPARTMENT]: 3,
+      [PermissionScope.SUBORDINATE]: 2,
+      [PermissionScope.SELF]: 1,
+    }
 
-    // if (!hasPermission) {
-    //   next(APIError.errorForbidden());
-    // }
+    const matching = uniquePermissions.filter(
+      p => p.entity === entity && p.action === action
+    )
 
-    next();
+    if (!matching.length) {
+      return next(APIError.errorForbidden())
+    }
 
-  };
-};
+    const bestScope = matching.sort(
+      (a, b) => scopeStrength[b.scope] - scopeStrength[a.scope]
+    )[0].scope
 
+    // Prüfe ob bester Scope >= required Scope
+    if (scopeStrength[bestScope] < scopeStrength[requiredScope]) {
+      return next(APIError.errorForbidden())
+    }
 
-// // check if any of the roles includes input
-// export function _checkPermission(input: string | string[] | string[][], permissions: string[]): boolean {
-
-//   let required: string[][];
-
-//   // convert every input to string[][];
-//   if (typeof input == "string") {
-//     // if input is string
-//     required = [[input]];
-//   } else if (_isArray(input) && (input as Array<string>).every(_isString)) {
-//     // if input is string[]
-//     required = [input as string[]];
-//   } else {
-//     // input is string[][]
-//     required = input as string[][];
-//   }
-
-//   // at least one element is true
-//   const isSufficient = required.some((r) => {
-//     // every r element is owned by user
-//     return r.every((permission) => {
-//       return permissions.indexOf(permission) !== -1;
-//     });
-//   });
-
-//   if (!isSufficient) {
-//     return false;
-//   }
-
-//   return true;
-// }
+    next()
+  }
+}
