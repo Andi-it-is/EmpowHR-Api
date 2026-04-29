@@ -11,7 +11,8 @@ const bodySchema = Joi.object({
   firstname: Joi.string().min(2).max(50).optional(),
   lastname: Joi.string().min(2).max(50).optional(),
   email: Joi.string().email().optional(),
-  disabled: Joi.boolean().optional()
+  disabled: Joi.boolean().optional(),
+  departmentId: Joi.string().uuid().allow(null),
 });
 
 /**
@@ -82,7 +83,14 @@ export const updateUserById: UserRequestHandler = async (req, res, next) => {
       });
     }
 
+    const { departmentId, ...rest } = body
+
     Object.assign(user, body);
+
+    if (departmentId !== undefined) {
+      user.department = departmentId ? { id: departmentId } as any : null
+    }
+
     const updated = await userRepo.save(user);
 
     return res.status(200).json({

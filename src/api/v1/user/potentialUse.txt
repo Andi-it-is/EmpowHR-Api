@@ -1,0 +1,50 @@
+  //------------------
+  // Determine allowed Scope
+  const allowedScope = req.maxTargetPermissionScope
+  let isAllowedToExecuteRoute = false
+
+  // check for all:
+  if (allowedScope === PermissionScope.ALL) {
+    isAllowedToExecuteRoute = true
+  } else {
+
+    const requestingUser = await AppDataSource.getRepository(User)
+      .findOne({
+        where: { id: req.user.id },
+        relations: {
+          department: true,
+          subordinates: true,
+          ledDepartments: true
+        }
+      })
+
+    // check if requesting user and target ressource's user is in the same department:
+    if (allowedScope === PermissionScope.DEPARTMENT) {
+      if (requestingUser?.department?.id === user?.department?.id) {
+        isAllowedToExecuteRoute = true
+      }
+    }
+
+    // check if requesting user is the chef of the targeted ressource's user
+    if (allowedScope === PermissionScope.SUBORDINATE) {
+      if (user?.supervisor?.id === requestingUser?.id) {
+        isAllowedToExecuteRoute = true
+      }
+    }
+
+    // check if the targeted resource's user is the requesting user (same person check)
+    if (allowedScope === PermissionScope.SELF) {
+      if (user?.id === requestingUser?.id) {
+        isAllowedToExecuteRoute = true
+      }
+    }
+  }
+
+
+  if (!isAllowedToExecuteRoute) {
+    return res.status(403).json({
+      success: false,
+      message: "Keine Berechtigung für diese Aktion.",
+    });
+  }
+  //------------------

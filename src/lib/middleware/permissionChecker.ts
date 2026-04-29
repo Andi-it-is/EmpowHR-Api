@@ -4,12 +4,18 @@ import { NextFunction } from "express";
 import { resolvePermissionsAsUniqueArray, resolveRoles } from "./resolveRolesPermissions";
 import { ExistingEntityNames, PermissionAction, PermissionScope } from "../enums/acessControl.enum";
 
+/**
+ ** TODO: Replace requiredScope and the division of scopes from the current setup 
+ *  to just either self/others, depending on the context of the route. ( others => needs to have req.params )
+ * 
+ * per each route that is using 'others', check for each own context which comparisons between requester user and target user is suitable 
+ */
 
 /**
  * example call
  * userRouter.get(
  *  '/all',  
- *  permissionChecker(ExistingEntityNames.USER, PermissionAction.READ, PermissionScope.SELF), 
+ *  permissionChecker(ExistingEntityNames.USER, PermissionAction.READ), 
  *  listAllUsers
  * )
  *
@@ -21,7 +27,6 @@ import { ExistingEntityNames, PermissionAction, PermissionScope } from "../enums
 export const permissionChecker = (
   entity: ExistingEntityNames,
   action: PermissionAction,
-  requiredScope: PermissionScope
 ) => {
   return async (req: UserRequest, res: any, next: NextFunction): Promise<any> => {
 
@@ -46,10 +51,7 @@ export const permissionChecker = (
       (a, b) => scopeStrength[b.scope] - scopeStrength[a.scope]
     )[0].scope
 
-    // Prüfe ob bester Scope >= required Scope
-    if (scopeStrength[bestScope] < scopeStrength[requiredScope]) {
-      return next(APIError.errorForbidden())
-    }
+    req.maxTargetPermissionScope = bestScope as PermissionScope
 
     next()
   }

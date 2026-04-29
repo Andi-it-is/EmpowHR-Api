@@ -6,12 +6,15 @@ import { updateUserById } from './updateUserById';
 import { deleteUserById } from './deleteUserById';
 import { updateUserRolesByUserId } from './updateUserRolesByUserId';
 import { ExistingEntityNames, PermissionAction, PermissionScope } from '../../../lib/enums/acessControl.enum';
+import { getUserById } from './getUserById';
 
 const userRouter = Router();
 
 userRouter.get('/simple', getSimpleUserInfo)
 
-userRouter.get('/all', permissionChecker(ExistingEntityNames.USER, PermissionAction.READ, PermissionScope.ALL), listAllUsers)
+userRouter.get('/all', permissionChecker(ExistingEntityNames.USER, PermissionAction.READ), listAllUsers)
+
+userRouter.get('/:id', permissionChecker(ExistingEntityNames.USER, PermissionAction.READ), getUserById)
 
 userRouter.patch('/:id', updateUserById)
 userRouter.patch('/:id/roles', updateUserRolesByUserId)

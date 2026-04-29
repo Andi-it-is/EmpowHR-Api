@@ -14,6 +14,10 @@ import permissionRouter from "./permission/router";
 import departmentRouter from "./department/router";
 
 const router = Router()
+/**
+ ** Note: Static routes need to be registered first, before dynamic routes
+ ** e.g.  /route/all   > /route/:id
+ */
 
 // public routes
 router.use("/public", publicRouter)
