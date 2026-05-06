@@ -256,6 +256,10 @@ export const createTimeEntry: UserRequestHandler = async (req, res, next) => {
     if (body.working_location && body.type === TimeEntryType.WORK) {
       confirmStatus = true
     }
+    // being sick does not need approval by default
+    if(body.type === TimeEntryType.SICK || body.type === TimeEntryType.SICK_CHILD || body.type === TimeEntryType.PUBLIC_HOLIDAY) {
+      confirmStatus = true
+    }
 
     const total_hours = (end.getTime() - start.getTime()) / 1000 / 60 / 60
 

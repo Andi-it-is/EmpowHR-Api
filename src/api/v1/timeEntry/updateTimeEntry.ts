@@ -16,6 +16,7 @@ const bodySchema = Joi.object({
   end_date: Joi.string().isoDate().required(),
   working_location: Joi.string().valid(...Object.values(WorkingLocation)).optional().allow(null),   // null working location => abscence
   type: Joi.string().valid(...Object.values(TimeEntryType)).optional(),
+  is_confirmed: Joi.boolean().optional(),
 })
 
 /**
@@ -158,6 +159,7 @@ export const updateTimeEntry: UserRequestHandler = async (req, res, next) => {
         type,
         recorded_hours,
         interruption_hours,
+        ...(body.is_confirmed !== undefined && { is_confirmed: body.is_confirmed }),
       }
     )
 
