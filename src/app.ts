@@ -14,7 +14,7 @@ const app = express();
 const cors = require('cors')
 
 let corsOptions = {
-  origin: '*' ,//process.env.CORS_ORIGIN,
+  origin: process.env.CORS_ORIGIN,
   optionsSuccessStatus: 200,
   methods: ['GET', 'PUT', 'PATCH', 'POST', 'DELETE'],
   credentials: true,
