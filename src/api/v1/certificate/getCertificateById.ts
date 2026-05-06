@@ -77,7 +77,7 @@ export const getCertificatesById: UserRequestHandler = async (req, res, next) =>
 
     res.setHeader('Content-Type', 'application/pdf')
     res.setHeader('Content-Disposition', `inline; filename="${certificate.title}.pdf"`)
-    res.sendFile(path.resolve(certificate.file_path))
+    res.sendFile(path.join(process.cwd(), certificate.file_path))
 
   } catch (error) {
     next(error)
