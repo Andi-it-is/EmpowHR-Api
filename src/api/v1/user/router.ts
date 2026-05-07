@@ -8,6 +8,7 @@ import { updateUserRolesByUserId } from './updateUserRolesByUserId';
 import { ExistingEntityNames, PermissionAction, PermissionScope } from '../../../lib/enums/acessControl.enum';
 import { getUserById } from './getUserById';
 import { createFullUser } from './createFullUser';
+import { resetPassword } from './resetPasswordByUserId';
 
 const userRouter = Router();
 
@@ -22,4 +23,8 @@ userRouter.patch('/:id', updateUserById)
 userRouter.patch('/:id/roles', updateUserRolesByUserId)
 
 userRouter.delete('/:id', deleteUserById)
+
+
+
+userRouter.patch('/:id/reset-password', resetPassword)
 export default userRouter;
