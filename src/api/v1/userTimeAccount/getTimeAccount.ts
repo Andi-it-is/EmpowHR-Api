@@ -1,6 +1,7 @@
 import { UserRequestHandler } from "../../../lib/classes/UserRequestHandler"
 import { AppDataSource } from "../../../AppDataSource"
 import { UserTimeAccount } from "../../../entity/UserTimeAccount"
+import { checkPermissionScope } from "../../../lib/helpers/checkPermissionScope"
 
 export const getMyTimeAccount: UserRequestHandler = async (req, res, next) => {
   try {
@@ -14,6 +15,20 @@ export const getMyTimeAccount: UserRequestHandler = async (req, res, next) => {
         message: 'Kein Zeitkonto für diesen Benutzer gefunden.',
       })
     }
+
+    //* < Block to determine allowed Scope per route >
+    const isScopeAllowed = await checkPermissionScope({
+      requestingUserId: req.user.id,
+      allowedScope: req.maxTargetPermissionScope,
+      resolveTargetUserId: () => req.user.id,
+      resolveTargetDepartmentId: () => req.user.department.id,
+    })
+
+    if (!isScopeAllowed) {
+      return res.status(403).json({ success: false, message: "Keine Berechtigung für diese Aktion." })
+    }
+    //* < /Block to determine allowed Scope per route >
+
     const shouldWorkHoursPerWeek = timeAccount.contract_hours_per_week / timeAccount.working_days_per_week
 
     return res.status(200).json({

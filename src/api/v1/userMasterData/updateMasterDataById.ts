@@ -2,6 +2,7 @@ import { UserRequestHandler } from "../../../lib/classes/UserRequestHandler";
 import { AppDataSource } from "../../../AppDataSource";
 import { UserMasterData } from "../../../entity/UserMasterData";
 import Joi from "joi"
+import { checkPermissionScope } from "../../../lib/helpers/checkPermissionScope";
 
 const paramsSchema = Joi.object({
   id: Joi.string().uuid().required(),
@@ -46,6 +47,19 @@ export const updateMasterDataById: UserRequestHandler = async (req, res, next) =
       return res.status(404).json({ success: false, message: 'Stammdaten nicht gefunden' })
     }
 
+    //* < Block to determine allowed Scope per route >
+    const isScopeAllowed = await checkPermissionScope({
+      requestingUserId: req.user.id,
+      allowedScope: req.maxTargetPermissionScope,
+      resolveTargetUserId: () => params.id,
+      resolveTargetDepartmentId: () => masterData.user?.department?.id,
+    })
+
+    if (!isScopeAllowed) {
+      return res.status(403).json({ success: false, message: "Keine Berechtigung für diese Aktion." })
+    }
+    //* < /Block to determine allowed Scope per route >
+
     // Felder die auf dem User liegen separat behandeln
     const { firstname, lastname, ...masterDataFields } = body
 
@@ -55,6 +69,7 @@ export const updateMasterDataById: UserRequestHandler = async (req, res, next) =
       if (lastname) user.lastname = lastname
       await AppDataSource.manager.save(user)
     }
+
 
     Object.assign(masterData, masterDataFields)
     const saved = await AppDataSource.manager.save(masterData)

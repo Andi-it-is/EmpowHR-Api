@@ -5,6 +5,9 @@ import { AppDataSource } from "../../../AppDataSource"
 import { Certificate } from "../../../entity/Certificate"
 import Joi from 'joi'
 import multer from 'multer'
+import { DeepPartial } from 'typeorm'
+import { checkPermissionScope } from '../../../lib/helpers/checkPermissionScope'
+import { User } from '../../../entity/User'
 
 const paramSchema = Joi.object({
   userId: Joi.string().uuid().required(),
@@ -92,11 +95,34 @@ export const uploadCertificateMiddleware = upload.single('file')
 export const createCertificateForUser: UserRequestHandler = async (req, res, next) => {
   try {
     const { userId } = await paramSchema.validateAsync(req.params)
+    const targetUser = await AppDataSource.getRepository(User).findOne({
+      where: {
+        id: userId,
+      },
+      relations: {
+        certificates: true,
+        department: true
+      }
+    })
     const body = await bodySchema.validateAsync(req.body)
 
     if (!req.file) {
       return res.status(400).json({ success: false, message: 'Keine Datei hochgeladen.' })
     }
+
+
+    //* < Block to determine allowed Scope per route >
+    const isScopeAllowed = await checkPermissionScope({
+      requestingUserId: req.user.id,
+      allowedScope: req.maxTargetPermissionScope,
+      resolveTargetUserId: () => targetUser?.id,
+      resolveTargetDepartmentId: () => targetUser?.department.id,
+    })
+
+    if (!isScopeAllowed) {
+      return res.status(403).json({ success: false, message: "Keine Berechtigung für diese Aktion." })
+    }
+    //* < /Block to determine allowed Scope per route >
 
     const filePath = path.join('uploads', 'certificates', userId, req.file.originalname)
 
@@ -107,7 +133,7 @@ export const createCertificateForUser: UserRequestHandler = async (req, res, nex
       expires_at: body.expires_at ? new Date(body.expires_at) : null,
       file_path: filePath,
       user: { id: userId },
-    })
+    } as DeepPartial<Certificate>)
 
     await AppDataSource.getRepository(Certificate).save(certificate)
 

@@ -3,6 +3,7 @@ import { AppDataSource } from "../../../AppDataSource"
 import { Document } from "../../../entity/Document"
 import { DocumentSecurityLevel, DocumentType } from "../../../lib/enums/acessControl.enum"
 import Joi from 'joi'
+import { checkPermissionScope } from "../../../lib/helpers/checkPermissionScope"
 
 const paramSchema = Joi.object({
   userId: Joi.string().uuid().required(),
@@ -78,6 +79,19 @@ export const updateDocumentByUserId: UserRequestHandler = async (req, res, next)
     if (!document) {
       return res.status(404).json({ success: false, message: 'Dokument nicht gefunden.' })
     }
+
+    //* < Block to determine allowed Scope per route >
+    const isScopeAllowed = await checkPermissionScope({
+      requestingUserId: req.user.id,
+      allowedScope: req.maxTargetPermissionScope,
+      resolveTargetUserId: () => document.user.id,
+      resolveTargetDepartmentId: () => document.user.department.id,
+    })
+
+    if (!isScopeAllowed) {
+      return res.status(403).json({ success: false, message: "Keine Berechtigung für diese Aktion." })
+    }
+    //* < /Block to determine allowed Scope per route >
 
     await AppDataSource.getRepository(Document).update({ id: documentId }, {
       ...(body.title && { title: body.title }),

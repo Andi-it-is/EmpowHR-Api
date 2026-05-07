@@ -3,6 +3,8 @@ import { UserRequestHandler } from "../../../lib/classes/UserRequestHandler"
 import { AppDataSource } from "../../../AppDataSource"
 import Joi from 'joi'
 import { Certificate } from '../../../entity/Certificate'
+import { checkPermissionScope } from '../../../lib/helpers/checkPermissionScope'
+import { User } from '../../../entity/User'
 
 const paramSchema = Joi.object({
   userId: Joi.string().uuid().required(),
@@ -50,6 +52,28 @@ export const getCertificateByUserId: UserRequestHandler = async (req, res, next)
     const certificate = await AppDataSource.getRepository(Certificate).findOne({
       where: { id: certId, user: { id: userId } },
     })
+    const targetUser = await AppDataSource.getRepository(User).findOne({
+      where: {
+        id: userId,
+      },
+      relations: {
+        certificates: true,
+        department: true
+      }
+    })
+
+    //* < Block to determine allowed Scope per route >
+    const isScopeAllowed = await checkPermissionScope({
+      requestingUserId: req.user.id,
+      allowedScope: req.maxTargetPermissionScope,
+      resolveTargetUserId: () => targetUser?.id,
+      resolveTargetDepartmentId: () => targetUser?.department.id,
+    })
+
+    if (!isScopeAllowed) {
+      return res.status(403).json({ success: false, message: "Keine Berechtigung für diese Aktion." })
+    }
+    //* < /Block to determine allowed Scope per route >
 
     if (!certificate) {
       return res.status(404).json({ success: false, message: 'Nicht gefunden' })

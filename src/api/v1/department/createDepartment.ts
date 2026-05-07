@@ -3,6 +3,7 @@ import { User } from "../../../entity/User";
 import { UserRequestHandler } from "../../../lib/classes/UserRequestHandler";
 import { AppDataSource } from "../../../AppDataSource";
 import Joi from "joi";
+import { checkPermissionScope } from "../../../lib/helpers/checkPermissionScope";
 
 const bodySchema = Joi.object({
   name: Joi.string().min(2).max(100).required(),
@@ -62,6 +63,19 @@ export const createDepartment: UserRequestHandler = async (req, res, next) => {
     }
 
     const departmentRepo = AppDataSource.getRepository(Department);
+
+    //* < Block to determine allowed Scope per route >
+    const isScopeAllowed = await checkPermissionScope({
+      requestingUserId: req.user.id,
+      allowedScope: req.maxTargetPermissionScope,
+      resolveTargetUserId: () => req.user.id,
+      resolveTargetDepartmentId: () => req.user.department.id,
+    })
+
+    if (!isScopeAllowed) {
+      return res.status(403).json({ success: false, message: "Keine Berechtigung für diese Aktion." })
+    }
+    //* < /Block to determine allowed Scope per route >
 
     const department = departmentRepo.create({
       name: body.name,

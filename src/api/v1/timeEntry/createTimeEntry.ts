@@ -6,6 +6,7 @@ import { WorkingLocation, TimeEntryType } from "../../../lib/enums/timeRecording
 import Joi from 'joi'
 import { LessThan, MoreThan, Not } from "typeorm"
 import { calculateTimeEntryHours } from "../../../lib/utils/timeCalculations"
+import { checkPermissionScope } from "../../../lib/helpers/checkPermissionScope"
 
 
 const bodySchema = Joi.object({
@@ -257,7 +258,7 @@ export const createTimeEntry: UserRequestHandler = async (req, res, next) => {
       confirmStatus = true
     }
     // being sick does not need approval by default
-    if(body.type === TimeEntryType.SICK || body.type === TimeEntryType.SICK_CHILD || body.type === TimeEntryType.PUBLIC_HOLIDAY) {
+    if (body.type === TimeEntryType.SICK || body.type === TimeEntryType.SICK_CHILD || body.type === TimeEntryType.PUBLIC_HOLIDAY) {
       confirmStatus = true
     }
 
@@ -269,6 +270,19 @@ export const createTimeEntry: UserRequestHandler = async (req, res, next) => {
         message: 'Ein Arbeitstag darf maximal 10 Stunden und 45 Minuten umfassen (§3 ArbZG).',
       })
     }
+
+    //* < Block to determine allowed Scope per route >
+    const isScopeAllowed = await checkPermissionScope({
+      requestingUserId: req.user.id,
+      allowedScope: req.maxTargetPermissionScope,
+      resolveTargetUserId: () => req.user?.id,
+      resolveTargetDepartmentId: () => req.user?.department?.id,
+    })
+
+    if (!isScopeAllowed) {
+      return res.status(403).json({ success: false, message: "Keine Berechtigung für diese Aktion." })
+    }
+    //* < /Block to determine allowed Scope per route >
 
     const timeEntry = AppDataSource.getRepository(TimeEntry).create({
       start_date: start,

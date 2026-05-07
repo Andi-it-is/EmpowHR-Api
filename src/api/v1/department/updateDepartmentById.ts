@@ -3,6 +3,7 @@ import { User } from "../../../entity/User";
 import { UserRequestHandler } from "../../../lib/classes/UserRequestHandler";
 import { AppDataSource } from "../../../AppDataSource";
 import Joi from "joi";
+import { checkPermissionScope } from "../../../lib/helpers/checkPermissionScope";
 
 const paramsSchema = Joi.object({
   id: Joi.string().uuid().required(),
@@ -81,6 +82,19 @@ export const updateDepartmentById: UserRequestHandler = async (req, res, next) =
       where: { id: params.id },
       relations: { head: true, parent: true },
     });
+
+    //* < Block to determine allowed Scope per route >
+    const isScopeAllowed = await checkPermissionScope({
+      requestingUserId: req.user.id,
+      allowedScope: req.maxTargetPermissionScope,
+      resolveTargetUserId: () => req.user.id,
+      resolveTargetDepartmentId: () => req.user.department.id,
+    })
+
+    if (!isScopeAllowed) {
+      return res.status(403).json({ success: false, message: "Keine Berechtigung für diese Aktion." })
+    }
+    //* < /Block to determine allowed Scope per route >
 
     if (!department) {
       return res.status(404).json({

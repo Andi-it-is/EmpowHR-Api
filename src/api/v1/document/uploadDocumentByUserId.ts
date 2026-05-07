@@ -6,6 +6,8 @@ import Joi from 'joi'
 import multer from 'multer'
 import path from 'path'
 import fs from 'fs'
+import { checkPermissionScope } from "../../../lib/helpers/checkPermissionScope"
+import { User } from "../../../entity/User"
 
 const paramsSchema = Joi.object({
   userId: Joi.string().uuid().required()
@@ -101,11 +103,28 @@ export const uploadDocumentByUserId: UserRequestHandler = async (req, res, next)
     const { userId } = await paramsSchema.validateAsync(req.params)
     const { title, type, security_level } = await bodySchema.validateAsync(req.body)
 
-    const userExists = await AppDataSource.getRepository('User').existsBy({ id: userId })
-    if (!userExists) {
+    const userExisting = await AppDataSource.getRepository(User).findOne({
+      where: { id: userId },
+      relations: ['department'],
+    })
+
+    if (!userExisting) {
       fs.unlink(req.file.path, () => { })
       return res.status(404).json({ success: false, message: 'Benutzer nicht gefunden' })
     }
+
+    //* < Block to determine allowed Scope per route >
+    const isScopeAllowed = await checkPermissionScope({
+      requestingUserId: req.user.id,
+      allowedScope: req.maxTargetPermissionScope,
+      resolveTargetUserId: () => userId,
+      resolveTargetDepartmentId: () => userExisting.department.id,
+    })
+
+    if (!isScopeAllowed) {
+      return res.status(403).json({ success: false, message: "Keine Berechtigung für diese Aktion." })
+    }
+    //* < /Block to determine allowed Scope per route >
 
     // Datei vom temp-Ordner in den userId-Ordner verschieben
     const targetDir = path.join(process.cwd(), 'uploads', 'documents', userId)

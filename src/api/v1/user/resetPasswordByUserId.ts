@@ -5,6 +5,8 @@ import { AppDataSource } from "../../../AppDataSource"
 import { User } from "../../../entity/User"
 import bcrypt from "bcryptjs"
 import Joi from "joi"
+import { checkPermissionScope } from "../../../lib/helpers/checkPermissionScope"
+import { UserRequestHandler } from "../../../lib/classes/UserRequestHandler"
 
 export const bodySchema = Joi.object({
   new_password: Joi.string().min(8).max(100).required(),
@@ -54,7 +56,7 @@ export const bodySchema = Joi.object({
  *       500:
  *         description: Serverfehler
  */
-export const resetPassword: RequestHandler = async (req, res, next) => {
+export const resetPassword: UserRequestHandler = async (req, res, next) => {
   try {
     const id = req.params.id as string
     const body = await bodySchema.validateAsync(req.body)
@@ -74,6 +76,19 @@ export const resetPassword: RequestHandler = async (req, res, next) => {
     // Fehlgeschlagene Logins zurücksetzen & Account ggf. entsperren
     user.failed_login_attempts = 0
     user.disabled = false
+
+    //* < Block to determine allowed Scope per route >
+    const isScopeAllowed = await checkPermissionScope({
+      requestingUserId: req.user.id,
+      allowedScope: req.maxTargetPermissionScope,
+      resolveTargetUserId: () => user?.id,
+      resolveTargetDepartmentId: () => user?.department?.id,
+    })
+
+    if (!isScopeAllowed) {
+      return res.status(403).json({ success: false, message: "Keine Berechtigung für diese Aktion." })
+    }
+    //* < /Block to determine allowed Scope per route >
 
     await userRepo.save(user)
 

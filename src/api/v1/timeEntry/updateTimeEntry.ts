@@ -6,6 +6,7 @@ import { WorkingLocation, TimeEntryType } from "../../../lib/enums/timeRecording
 import Joi from 'joi'
 import { LessThan, MoreThan, Not } from "typeorm"
 import { calculateTimeEntryHours } from "../../../lib/utils/timeCalculations"
+import { checkPermissionScope } from "../../../lib/helpers/checkPermissionScope"
 
 const paramSchema = Joi.object({
   id: Joi.string().uuid().required(),
@@ -122,6 +123,19 @@ export const updateTimeEntry: UserRequestHandler = async (req, res, next) => {
         message: 'Zeiteintrag nicht gefunden.',
       })
     }
+
+    //* < Block to determine allowed Scope per route >
+    const isScopeAllowed = await checkPermissionScope({
+      requestingUserId: req.user.id,
+      allowedScope: req.maxTargetPermissionScope,
+      resolveTargetUserId: () => timeEntry.time_account.user.id,
+      resolveTargetDepartmentId: () => timeEntry.time_account.user?.department?.id,
+    })
+
+    if (!isScopeAllowed) {
+      return res.status(403).json({ success: false, message: "Keine Berechtigung für diese Aktion." })
+    }
+    //* < /Block to determine allowed Scope per route >
 
     // Prüfen ob ein anderer Eintrag am selben Tag existiert
     const startOfDay = new Date(start)

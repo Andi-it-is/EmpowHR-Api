@@ -12,19 +12,17 @@ import { resetPassword } from './resetPasswordByUserId';
 
 const userRouter = Router();
 
-userRouter.get('/simple', getSimpleUserInfo)
-
+userRouter.get('/simple', permissionChecker(ExistingEntityNames.USER, PermissionAction.READ), getSimpleUserInfo)
 userRouter.get('/all', permissionChecker(ExistingEntityNames.USER, PermissionAction.READ), listAllUsers)
 
 userRouter.post('/create', permissionChecker(ExistingEntityNames.USER, PermissionAction.CREATE), createFullUser)
+
 userRouter.get('/:id', permissionChecker(ExistingEntityNames.USER, PermissionAction.READ), getUserById)
 
-userRouter.patch('/:id', updateUserById)
-userRouter.patch('/:id/roles', updateUserRolesByUserId)
+userRouter.patch('/:id', permissionChecker(ExistingEntityNames.USER, PermissionAction.UPDATE), updateUserById)
+userRouter.patch('/:id/roles', permissionChecker(ExistingEntityNames.USER, PermissionAction.UPDATE), updateUserRolesByUserId)
+userRouter.patch('/:id/reset-password', permissionChecker(ExistingEntityNames.USER, PermissionAction.UPDATE), resetPassword)
 
-userRouter.delete('/:id', deleteUserById)
+userRouter.delete('/:id', permissionChecker(ExistingEntityNames.USER, PermissionAction.DELETE), deleteUserById)
 
-
-
-userRouter.patch('/:id/reset-password', resetPassword)
 export default userRouter;

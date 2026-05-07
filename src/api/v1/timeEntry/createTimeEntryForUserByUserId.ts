@@ -6,6 +6,7 @@ import { WorkingLocation, TimeEntryType } from "../../../lib/enums/timeRecording
 import Joi from 'joi'
 import { LessThan, MoreThan, Not } from "typeorm"
 import { calculateTimeEntryHours } from "../../../lib/utils/timeCalculations"
+import { checkPermissionScope } from "../../../lib/helpers/checkPermissionScope"
 
 const paramSchema = Joi.object({
   id: Joi.string().uuid().required(),
@@ -161,6 +162,19 @@ export const createTimeEntryForUserByUserId: UserRequestHandler = async (req, re
     if (body.type === TimeEntryType.SICK || body.type === TimeEntryType.SICK_CHILD || body.type === TimeEntryType.PUBLIC_HOLIDAY) {
       confirmStatus = true
     }
+
+    //* < Block to determine allowed Scope per route >
+    const isScopeAllowed = await checkPermissionScope({
+      requestingUserId: req.user.id,
+      allowedScope: req.maxTargetPermissionScope,
+      resolveTargetUserId: () => timeAccount.user.id,
+      resolveTargetDepartmentId: () => timeAccount.user.department.id,
+    })
+
+    if (!isScopeAllowed) {
+      return res.status(403).json({ success: false, message: "Keine Berechtigung für diese Aktion." })
+    }
+    //* < /Block to determine allowed Scope per route >
 
     const timeEntry = AppDataSource.getRepository(TimeEntry).create({
       start_date: start,

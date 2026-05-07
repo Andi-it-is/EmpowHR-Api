@@ -3,6 +3,7 @@ import { AppDataSource } from "../../../AppDataSource"
 import { TimeEntry } from "../../../entity/TimeEntry"
 import { UserTimeAccount } from "../../../entity/UserTimeAccount"
 import Joi from 'joi'
+import { checkPermissionScope } from "../../../lib/helpers/checkPermissionScope"
 
 const paramSchema = Joi.object({
   id: Joi.string().uuid().required(),
@@ -68,6 +69,19 @@ export const deleteTimeEntry: UserRequestHandler = async (req, res, next) => {
         message: 'Zeiteintrag nicht gefunden.',
       })
     }
+
+    //* < Block to determine allowed Scope per route >
+    const isScopeAllowed = await checkPermissionScope({
+      requestingUserId: req.user.id,
+      allowedScope: req.maxTargetPermissionScope,
+      resolveTargetUserId: () => timeEntry.time_account.user.id,
+      resolveTargetDepartmentId: () => timeEntry.time_account.user.department.id,
+    })
+
+    if (!isScopeAllowed) {
+      return res.status(403).json({ success: false, message: "Keine Berechtigung für diese Aktion." })
+    }
+    //* < /Block to determine allowed Scope per route >
 
     await AppDataSource.getRepository(TimeEntry).delete({ id })
 

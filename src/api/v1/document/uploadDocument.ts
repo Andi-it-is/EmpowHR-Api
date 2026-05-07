@@ -6,6 +6,7 @@ import Joi from 'joi'
 import multer from 'multer'
 import path from 'path'
 import fs from 'fs'
+import { checkPermissionScope } from "../../../lib/helpers/checkPermissionScope"
 
 const storage = multer.diskStorage({
   destination: (_req, _file, cb) => {
@@ -131,12 +132,36 @@ export const uploadDocument: UserRequestHandler = async (req, res, next) => {
 
     const { title, type, security_level } = await bodySchema.validateAsync(req.body)
 
+    //* < Block to determine allowed Scope per route >
+    const isScopeAllowed = await checkPermissionScope({
+      requestingUserId: req.user.id,
+      allowedScope: req.maxTargetPermissionScope,
+      resolveTargetUserId: () => req.user.id,
+      resolveTargetDepartmentId: () => req.user.department.id,
+    })
+
+    if (!isScopeAllowed) {
+      return res.status(403).json({ success: false, message: "Keine Berechtigung für diese Aktion." })
+    }
+    //* < /Block to determine allowed Scope per route >
+
+    // Datei vom temp-Ordner in den userId-Ordner verschieben
+    const userId = req.user.id
+    const targetDir = path.join(process.cwd(), 'uploads', 'documents', userId)
+    fs.mkdirSync(targetDir, { recursive: true })
+
+    const targetPath = path.join(targetDir, req.file.originalname)
+    fs.copyFileSync(req.file.path, targetPath)
+    fs.unlinkSync(req.file.path)
+
+    const filePath = ['uploads', 'documents', userId, req.file.originalname].join('/')
+
     const document = AppDataSource.getRepository(Document).create({
       title,
       type,
       security_level,
-      file_path: req.file.path,
-      user: { id: req.user.id },
+      file_path: filePath,
+      user: { id: userId },
     })
 
     await AppDataSource.getRepository(Document).save(document)

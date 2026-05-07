@@ -4,6 +4,7 @@ import { Document } from "../../../entity/Document"
 import Joi from 'joi'
 import { DocumentSecurityLevel, DocumentType } from "../../../lib/enums/acessControl.enum"
 import { Certificate } from "../../../entity/Certificate"
+import { checkPermissionScope } from "../../../lib/helpers/checkPermissionScope"
 
 /**
  * @swagger
@@ -80,6 +81,19 @@ export const listCertificates: UserRequestHandler = async (req, res, next) => {
       },
       order: { created_at: 'DESC' }
     })
+
+    //* < Block to determine allowed Scope per route >
+    const isScopeAllowed = await checkPermissionScope({
+      requestingUserId: req.user.id,
+      allowedScope: req.maxTargetPermissionScope,
+      resolveTargetUserId: () => req.user.id,
+      resolveTargetDepartmentId: () => req.user.department.id,
+    })
+
+    if (!isScopeAllowed) {
+      return res.status(403).json({ success: false, message: "Keine Berechtigung für diese Aktion." })
+    }
+    //* < /Block to determine allowed Scope per route >
 
     return res.status(200).json({
       success: true,

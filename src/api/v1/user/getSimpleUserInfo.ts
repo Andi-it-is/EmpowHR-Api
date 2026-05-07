@@ -1,6 +1,7 @@
 import { User } from "../../../entity/User";
 import { UserRequestHandler } from "../../../lib/classes/UserRequestHandler";
 import { AppDataSource } from "../../../AppDataSource";
+import { checkPermissionScope } from "../../../lib/helpers/checkPermissionScope";
 
 /**
  * @swagger
@@ -64,6 +65,19 @@ export const getSimpleUserInfo: UserRequestHandler = async (req, res, next) => {
           email: true,
         }
       })
+
+    //* < Block to determine allowed Scope per route >
+    const isScopeAllowed = await checkPermissionScope({
+      requestingUserId: req.user.id,
+      allowedScope: req.maxTargetPermissionScope,
+      resolveTargetUserId: () => user?.id,
+      resolveTargetDepartmentId: () => user?.department?.id,
+    })
+
+    if (!isScopeAllowed) {
+      return res.status(403).json({ success: false, message: "Keine Berechtigung für diese Aktion." })
+    }
+    //* < /Block to determine allowed Scope per route >
 
     if (!user) {
       return res.status(404).json({

@@ -5,6 +5,7 @@ import { WorkingLocation, TimeEntryType } from "../../../lib/enums/timeRecording
 import { Between, In, MoreThanOrEqual, LessThanOrEqual, FindOptionsWhere, IsNull } from "typeorm"
 import Joi from 'joi'
 import { UserTimeAccount } from "../../../entity/UserTimeAccount"
+import { checkPermissionScope } from "../../../lib/helpers/checkPermissionScope"
 
 const bodySchema = Joi.object({
   working_location: Joi.array().items(
@@ -135,6 +136,19 @@ export const listTimeEntriesByFilters: UserRequestHandler = async (req, res, nex
         message: 'Kein Zeitkonto für diesen Benutzer gefunden.',
       })
     }
+
+    //* < Block to determine allowed Scope per route >
+    const isScopeAllowed = await checkPermissionScope({
+      requestingUserId: req.user.id,
+      allowedScope: req.maxTargetPermissionScope,
+      resolveTargetUserId: () => timeAccount.user.id,
+      resolveTargetDepartmentId: () => timeAccount.user.department.id,
+    })
+
+    if (!isScopeAllowed) {
+      return res.status(403).json({ success: false, message: "Keine Berechtigung für diese Aktion." })
+    }
+    //* < /Block to determine allowed Scope per route >
 
     const shouldWorkHoursPerDay = Math.round((timeAccount.contract_hours_per_week / timeAccount.working_days_per_week) * 100) / 100
 

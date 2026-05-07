@@ -6,6 +6,7 @@ import { WorkingLocation, TimeEntryType } from "../../../lib/enums/timeRecording
 import Joi from 'joi'
 import { LessThan, MoreThan, Not } from "typeorm"
 import { calculateTimeEntryHours } from "../../../lib/utils/timeCalculations"
+import { checkPermissionScope } from "../../../lib/helpers/checkPermissionScope"
 
 const paramSchema = Joi.object({
   userId: Joi.string().uuid().required(),
@@ -129,6 +130,19 @@ export const updateTimeEntryByUserId: UserRequestHandler = async (req, res, next
         message: 'Zeiteintrag nicht gefunden.',
       })
     }
+
+    //* < Block to determine allowed Scope per route >
+    const isScopeAllowed = await checkPermissionScope({
+      requestingUserId: req.user.id,
+      allowedScope: req.maxTargetPermissionScope,
+      resolveTargetUserId: () => timeAccount.user.id,
+      resolveTargetDepartmentId: () => timeAccount.user?.department?.id,
+    })
+
+    if (!isScopeAllowed) {
+      return res.status(403).json({ success: false, message: "Keine Berechtigung für diese Aktion." })
+    }
+    //* < /Block to determine allowed Scope per route >
 
     const conflictingEntry = await AppDataSource.getRepository(TimeEntry).findOne({
       where: {

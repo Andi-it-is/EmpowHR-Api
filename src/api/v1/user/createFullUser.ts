@@ -5,6 +5,7 @@ import { User } from "../../../entity/User";
 import { Department } from "../../../entity/Department";
 import { UserMasterData } from "../../../entity/UserMasterData";
 import { UserTimeAccount } from "../../../entity/UserTimeAccount";
+import { checkPermissionScope } from "../../../lib/helpers/checkPermissionScope";
 
 enum Gender {
   MALE = 'male',
@@ -91,6 +92,19 @@ export const createFullUser: UserRequestHandler = async (req, res, next) => {
 
     // Temporäres Passwort – sollte per Mail verschickt oder separat gesetzt werden
     user.password_hash = 'CHANGEME'
+
+    //* < Block to determine allowed Scope per route >
+    const isScopeAllowed = await checkPermissionScope({
+      requestingUserId: req.user.id,
+      allowedScope: req.maxTargetPermissionScope,
+      resolveTargetUserId: () => user?.id,
+      resolveTargetDepartmentId: () => user?.department?.id,
+    })
+
+    if (!isScopeAllowed) {
+      return res.status(403).json({ success: false, message: "Keine Berechtigung für diese Aktion." })
+    }
+    //* < /Block to determine allowed Scope per route >
 
     await userRepo.save(user)
 

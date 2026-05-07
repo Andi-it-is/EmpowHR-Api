@@ -4,6 +4,7 @@ import { Document } from "../../../entity/Document"
 import Joi from 'joi'
 import path from 'path'
 import fs from 'fs'
+import { checkPermissionScope } from "../../../lib/helpers/checkPermissionScope"
 
 const paramSchema = Joi.object({
   userId: Joi.string().uuid().required(),
@@ -52,6 +53,19 @@ export const deleteDocumentByUserId: UserRequestHandler = async (req, res, next)
     if (!document) {
       return res.status(404).json({ success: false, message: 'Dokument nicht gefunden.' })
     }
+
+    //* < Block to determine allowed Scope per route >
+    const isScopeAllowed = await checkPermissionScope({
+      requestingUserId: req.user.id,
+      allowedScope: req.maxTargetPermissionScope,
+      resolveTargetUserId: () => document.user.id,
+      resolveTargetDepartmentId: () => document.user.department.id,
+    })
+
+    if (!isScopeAllowed) {
+      return res.status(403).json({ success: false, message: "Keine Berechtigung für diese Aktion." })
+    }
+    //* < /Block to determine allowed Scope per route >
 
     // Datei vom Dateisystem löschen
     const absolutePath = path.join(process.cwd(), document.file_path)

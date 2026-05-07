@@ -8,19 +8,20 @@ import { listDocumentsByUserId } from './listDocumentsByUserId';
 import { uploadDocumentByUserId, uploadDocumentMiddleware } from './uploadDocumentByUserId';
 import { updateDocumentByUserId } from './updateDocumentyByUserId';
 import { deleteDocumentByUserId } from './deleteDocumentByUserId';
+import { ExistingEntityNames, PermissionAction } from '../../../lib/enums/acessControl.enum';
 
 const documentRouter = Router();
 
-documentRouter.get('/my', listDocuments)
-documentRouter.post('/my/filter', listDocumentsByFilters)
+documentRouter.get('/my', permissionChecker(ExistingEntityNames.DOCUMENT, PermissionAction.READ), listDocuments)
+documentRouter.post('/my/filter', permissionChecker(ExistingEntityNames.DOCUMENT, PermissionAction.READ), listDocumentsByFilters)
 
-documentRouter.post('/my/upload', upload.single('file'), uploadDocument)
-documentRouter.post('/other/:userId/upload', uploadDocumentMiddleware, uploadDocumentByUserId)
+documentRouter.post('/my/upload', permissionChecker(ExistingEntityNames.DOCUMENT, PermissionAction.CREATE), upload.single('file'), uploadDocument)
+documentRouter.post('/other/:userId/upload', permissionChecker(ExistingEntityNames.DOCUMENT, PermissionAction.CREATE), uploadDocumentMiddleware, uploadDocumentByUserId)
 
-documentRouter.get('/other/:id', listDocumentsByUserId)
-documentRouter.get('/:id/file', getDocumentById)
+documentRouter.get('/other/:id', permissionChecker(ExistingEntityNames.DOCUMENT, PermissionAction.READ), listDocumentsByUserId)
+documentRouter.get('/:id/file', permissionChecker(ExistingEntityNames.DOCUMENT, PermissionAction.READ), getDocumentById)
 
-documentRouter.patch('/other/:userId/:documentId', updateDocumentByUserId)
-documentRouter.delete('/other/:userId/:documentId', deleteDocumentByUserId)
+documentRouter.patch('/other/:userId/:documentId', permissionChecker(ExistingEntityNames.DOCUMENT, PermissionAction.UPDATE), updateDocumentByUserId)
+documentRouter.delete('/other/:userId/:documentId', permissionChecker(ExistingEntityNames.DOCUMENT, PermissionAction.DELETE), deleteDocumentByUserId)
 
 export default documentRouter;
