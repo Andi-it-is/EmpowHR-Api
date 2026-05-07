@@ -69,8 +69,6 @@ export const getDocumentById: UserRequestHandler = async (req, res, next) => {
     const doc = await AppDataSource.getRepository(Document).findOne({
       where: {
         id: params.id,
-
-        user: { id: req.user.id }
       },
     })
 
