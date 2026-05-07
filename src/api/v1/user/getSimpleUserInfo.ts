@@ -60,11 +60,23 @@ export const getSimpleUserInfo: UserRequestHandler = async (req, res, next) => {
       .findOne({
         where: { id },
         select: {
+          id: true,
           firstname: true,
           lastname: true,
           email: true,
+        },
+        relations: {
+          department: true
         }
       })
+
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User nicht gefunden."
+      })
+    }
 
     //* < Block to determine allowed Scope per route >
     const isScopeAllowed = await checkPermissionScope({
@@ -75,16 +87,10 @@ export const getSimpleUserInfo: UserRequestHandler = async (req, res, next) => {
     })
 
     if (!isScopeAllowed) {
-      return res.status(403).json({ success: false, message: "Keine Berechtigung für diese Aktion." })
+      return res.status(403).json({ success: false, message: `Keine Berechtigung für diese Aktion${user} ||| ${req}` })
     }
     //* < /Block to determine allowed Scope per route >
 
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: "User nicht gefunden."
-      })
-    }
 
     return res.status(200).json({
       success: true,
