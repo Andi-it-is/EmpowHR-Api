@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { permissionChecker } from '../../../lib/middleware/permissionChecker';
-import { listAllDepartments } from './listtAllDepartments';
+import { listAllDepartments } from './listAllDepartments';
 import { createDepartment } from './createDepartment';
 import { updateDepartmentById } from './updateDepartmentById';
 import { deleteDepartmentById } from './deleteDepartmentById';
@@ -8,10 +8,10 @@ import { ExistingEntityNames, PermissionAction } from '../../../lib/enums/acessC
 
 const departmentRouter = Router();
 
-departmentRouter.get('/all', listAllDepartments)
+departmentRouter.get('/all', permissionChecker(ExistingEntityNames.DEPARTMENT, PermissionAction.READ), listAllDepartments)
 departmentRouter.post('/create', permissionChecker(ExistingEntityNames.DEPARTMENT, PermissionAction.CREATE), createDepartment)
 
-departmentRouter.patch('/:id', updateDepartmentById)
-departmentRouter.delete('/:id', deleteDepartmentById)
+departmentRouter.patch('/:id', permissionChecker(ExistingEntityNames.DEPARTMENT, PermissionAction.UPDATE), updateDepartmentById)
+departmentRouter.delete('/:id', permissionChecker(ExistingEntityNames.DEPARTMENT, PermissionAction.DELETE), deleteDepartmentById)
 
 export default departmentRouter;
