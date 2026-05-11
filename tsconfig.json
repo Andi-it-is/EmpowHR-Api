@@ -28,7 +28,6 @@
    "include": [
       "src/**/*.ts",
       "test/**/*.ts",
-      "jest.config.ts"
    ],
    "ts-node": { // <-- damit jest.config.ts ausführbar ist
       "transpileOnly": true

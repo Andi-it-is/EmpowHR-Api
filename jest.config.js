@@ -1,7 +1,7 @@
 // jest.config.ts
-import type { Config } from 'jest';
+/** @type {import('jest').Config} */
 
-const config: Config = {
+const config = {
   setupFiles: ['reflect-metadata', '<rootDir>/test/helpers/loadEnv.ts'],
   preset: 'ts-jest',
   testEnvironment: 'node',
@@ -17,4 +17,4 @@ const config: Config = {
   clearMocks: true,
 };
 
-export default config;
+module.exports = config;
