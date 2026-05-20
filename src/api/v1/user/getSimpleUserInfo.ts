@@ -64,6 +64,7 @@ export const getSimpleUserInfo: UserRequestHandler = async (req, res, next) => {
           firstname: true,
           lastname: true,
           email: true,
+          department: true
         },
         relations: {
           department: true

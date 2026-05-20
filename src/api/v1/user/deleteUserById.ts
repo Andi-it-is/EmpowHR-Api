@@ -46,6 +46,8 @@ export const deleteUserById: UserRequestHandler = async (req, res, next) => {
 
     const userRepo = AppDataSource.getRepository(User);
 
+    const user = await userRepo.findOne({ where: { id: params.id } });
+
     //* < Block to determine allowed Scope per route >
     const isScopeAllowed = await checkPermissionScope({
       requestingUserId: req.user.id,
@@ -59,7 +61,7 @@ export const deleteUserById: UserRequestHandler = async (req, res, next) => {
     }
     //* < /Block to determine allowed Scope per route >
 
-    const user = await userRepo.findOne({ where: { id: params.id } });
+
     if (!user) {
       return res.status(404).json({
         success: false,

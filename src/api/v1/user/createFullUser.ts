@@ -93,6 +93,8 @@ export const createFullUser: UserRequestHandler = async (req, res, next) => {
     // Temporäres Passwort – sollte per Mail verschickt oder separat gesetzt werden
     user.password_hash = 'CHANGEME'
 
+    await userRepo.save(user)
+
     //* < Block to determine allowed Scope per route >
     const isScopeAllowed = await checkPermissionScope({
       requestingUserId: req.user.id,
@@ -102,11 +104,11 @@ export const createFullUser: UserRequestHandler = async (req, res, next) => {
     })
 
     if (!isScopeAllowed) {
+      await userRepo.remove(user) // rollback
       return res.status(403).json({ success: false, message: "Keine Berechtigung für diese Aktion." })
     }
     //* < /Block to determine allowed Scope per route >
 
-    await userRepo.save(user)
 
     return res.status(201).json({ message: 'Mitarbeitender erfolgreich angelegt', id: user.id })
 
