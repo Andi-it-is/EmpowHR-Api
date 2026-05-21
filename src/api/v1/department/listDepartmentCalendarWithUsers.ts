@@ -15,6 +15,116 @@ const bodySchema = Joi.object({
   year: Joi.number().integer().min(2000).max(2100).required(),
 });
 
+
+/**
+ * @swagger
+ * /department/list/teamcalendar/:id:
+ *   post:
+ *     summary: Abteilungskalender mit vollständigen Einträgen
+ *     description: >
+ *       Gibt alle Zeiteinträge der Mitarbeiter einer Abteilung für einen bestimmten Monat zurück.
+ *       Alle Einträge sind vollständig sichtbar (Typ, Stunden, Arbeitsort).
+ *       Nur für Berechtigte mit Zugriff auf die gesamte Abteilung.
+ *     tags:
+ *       - Department
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: ID der Abteilung
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - month
+ *               - year
+ *             properties:
+ *               month:
+ *                 type: integer
+ *                 minimum: 1
+ *                 maximum: 12
+ *                 example: 5
+ *               year:
+ *                 type: integer
+ *                 minimum: 2000
+ *                 maximum: 2100
+ *                 example: 2026
+ *     responses:
+ *       200:
+ *         description: Kalender erfolgreich abgerufen
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                       format: uuid
+ *                     name:
+ *                       type: string
+ *                       example: "IT"
+ *                     users:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           id:
+ *                             type: string
+ *                             format: uuid
+ *                           firstname:
+ *                             type: string
+ *                           lastname:
+ *                             type: string
+ *                           email:
+ *                             type: string
+ *                           timeEntries:
+ *                             type: array
+ *                             items:
+ *                               type: object
+ *                               properties:
+ *                                 id:
+ *                                   type: string
+ *                                   format: uuid
+ *                                 type:
+ *                                   type: string
+ *                                   enum: [WORK, VACATION, SICK, SICK_CHILD, EDUCATION, PUBLIC_HOLIDAY, COMPENSATORY_OFF, SPECIAL_LEAVE, PARENTAL_LEAVE, UNPAID_LEAVE, ON_CALL]
+ *                                 working_location:
+ *                                   type: string
+ *                                   enum: [OFFICE, REMOTE, FIELD_SERVICE]
+ *                                   nullable: true
+ *                                 start_date:
+ *                                   type: string
+ *                                   format: date-time
+ *                                 end_date:
+ *                                   type: string
+ *                                   format: date-time
+ *                                 recorded_hours:
+ *                                   type: number
+ *                                 interruption_hours:
+ *                                   type: number
+ *                                 is_confirmed:
+ *                                   type: boolean
+ *       400:
+ *         description: Validierungsfehler
+ *       403:
+ *         description: Keine Berechtigung
+ *       404:
+ *         description: Abteilung nicht gefunden
+ *       500:
+ *         description: Serverfehler
+ */
 export const listDepartmentCalendarWithUsers: UserRequestHandler = async (req, res, next) => {
   try {
     const { error: paramsError, value: params } = paramsSchema.validate(req.params);

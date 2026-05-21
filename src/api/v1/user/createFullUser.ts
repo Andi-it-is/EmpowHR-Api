@@ -44,6 +44,145 @@ const bodySchema = Joi.object({
   delta_hours: Joi.number().required(),
 })
 
+/**
+ * @swagger
+ * /user:
+ *   post:
+ *     summary: Neuen Mitarbeitenden anlegen
+ *     description: >
+ *       Legt einen neuen Mitarbeitenden vollständig an, inklusive Stammdaten und Zeitkonto.
+ *       Bei fehlender Berechtigung wird der bereits gespeicherte User automatisch zurückgerollt.
+ *     tags:
+ *       - User
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - firstname
+ *               - lastname
+ *               - email
+ *               - departmentId
+ *               - location
+ *               - entryDate
+ *               - job_title
+ *               - birthDate
+ *               - birthPlace
+ *               - nationality
+ *               - gender
+ *               - banking_detail
+ *               - street
+ *               - zipcode
+ *               - city
+ *               - country
+ *               - company_alias
+ *               - telephone_business
+ *               - contract_hours_per_week
+ *               - working_days_per_week
+ *               - vacation_days_per_year
+ *               - delta_hours
+ *             properties:
+ *               firstname:
+ *                 type: string
+ *                 example: "Max"
+ *               lastname:
+ *                 type: string
+ *                 example: "Mustermann"
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 example: "max.mustermann@empowhr.de"
+ *               departmentId:
+ *                 type: string
+ *                 format: uuid
+ *               location:
+ *                 type: string
+ *                 example: "Düsseldorf"
+ *               entryDate:
+ *                 type: string
+ *                 format: date
+ *                 example: "2026-06-01"
+ *               job_title:
+ *                 type: string
+ *                 example: "Software Developer"
+ *               birthDate:
+ *                 type: string
+ *                 format: date
+ *                 example: "1990-01-15"
+ *               birthPlace:
+ *                 type: string
+ *                 example: "Köln"
+ *               nationality:
+ *                 type: string
+ *                 example: "deutsch"
+ *               gender:
+ *                 type: string
+ *                 enum: [male, female, "-"]
+ *               banking_detail:
+ *                 type: string
+ *                 example: "DE89 3704 0044 0532 0130 00"
+ *               street:
+ *                 type: string
+ *                 example: "Musterstraße 1"
+ *               zipcode:
+ *                 type: string
+ *                 example: "40210"
+ *               city:
+ *                 type: string
+ *                 example: "Düsseldorf"
+ *               country:
+ *                 type: string
+ *                 example: "Deutschland"
+ *               company_alias:
+ *                 type: string
+ *                 example: "K_123"
+ *               telephone_business:
+ *                 type: string
+ *                 example: "+49 211 1000-100"
+ *               telephone_private:
+ *                 type: string
+ *                 example: "+49 172 1234567"
+ *               contract_hours_per_week:
+ *                 type: number
+ *                 example: 40
+ *               working_days_per_week:
+ *                 type: number
+ *                 minimum: 1
+ *                 maximum: 7
+ *                 example: 5
+ *               vacation_days_per_year:
+ *                 type: number
+ *                 example: 30
+ *               delta_hours:
+ *                 type: number
+ *                 example: 0
+ *     responses:
+ *       201:
+ *         description: Mitarbeitender erfolgreich angelegt
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Mitarbeitender erfolgreich angelegt"
+ *                 id:
+ *                   type: string
+ *                   format: uuid
+ *       400:
+ *         description: Validierungsfehler
+ *       403:
+ *         description: Keine Berechtigung
+ *       404:
+ *         description: Abteilung nicht gefunden
+ *       409:
+ *         description: E-Mail wird bereits verwendet
+ *       500:
+ *         description: Serverfehler
+ */
 export const createFullUser: UserRequestHandler = async (req, res, next) => {
   try {
     const body = await bodySchema.validateAsync(req.body, { abortEarly: false })

@@ -14,11 +14,60 @@ const bodySchema = Joi.object({
 
 /**
  * @swagger
- * /time-entry/{id}/confirmation:
+ * /timeEntry/{id}/confirm:
  *   patch:
- *     summary: Zeiteintrag bestätigen oder ablehnen
+ *     summary: Bestätigungsstatus eines Zeiteintrags ändern
+ *     description: Setzt den Bestätigungsstatus eines Zeiteintrags auf bestätigt oder unbestätigt.
  *     tags:
- *       - TimeEntry
+ *       - TimeEntries
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: ID des Zeiteintrags
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - is_confirmed
+ *             properties:
+ *               is_confirmed:
+ *                 type: boolean
+ *                 example: true
+ *     responses:
+ *       200:
+ *         description: Bestätigungsstatus erfolgreich aktualisiert
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                       format: uuid
+ *                     is_confirmed:
+ *                       type: boolean
+ *                       example: true
+ *       400:
+ *         description: Validierungsfehler
+ *       403:
+ *         description: Keine Berechtigung
+ *       404:
+ *         description: Zeiteintrag nicht gefunden
+ *       500:
+ *         description: Serverfehler
  */
 export const changeTimeEntryConfirmation: UserRequestHandler = async (req, res, next) => {
   try {

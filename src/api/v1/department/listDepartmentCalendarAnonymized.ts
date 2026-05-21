@@ -16,12 +16,116 @@ const bodySchema = Joi.object({
 
 /**
  * @swagger
- * /department/{id}/calendar/anonymized:
+ * /department/list/teamcalendar/:id/anonymized:
  *   post:
  *     summary: Anonymisierter Abteilungskalender
- *     description: Gibt Zeiteinträge aller Mitarbeiter zurück. Eigene Einträge sind vollständig, fremde Einträge sind anonymisiert (kein Typ, keine Stunden).
+ *     description: >
+ *       Gibt Zeiteinträge aller Mitarbeiter einer Abteilung für einen bestimmten Monat zurück.
+ *       Eigene Einträge werden vollständig zurückgegeben, fremde Einträge sind anonymisiert
+ *       (kein Typ, keine Stunden – nur Datum und Bestätigungsstatus).
  *     tags:
  *       - Department
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: ID der Abteilung
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - month
+ *               - year
+ *             properties:
+ *               month:
+ *                 type: integer
+ *                 minimum: 1
+ *                 maximum: 12
+ *                 example: 5
+ *               year:
+ *                 type: integer
+ *                 minimum: 2000
+ *                 maximum: 2100
+ *                 example: 2026
+ *     responses:
+ *       200:
+ *         description: Kalender erfolgreich abgerufen
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                       format: uuid
+ *                     name:
+ *                       type: string
+ *                       example: "IT"
+ *                     users:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           id:
+ *                             type: string
+ *                             format: uuid
+ *                           firstname:
+ *                             type: string
+ *                           lastname:
+ *                             type: string
+ *                           email:
+ *                             type: string
+ *                           timeEntries:
+ *                             type: array
+ *                             items:
+ *                               type: object
+ *                               properties:
+ *                                 id:
+ *                                   type: string
+ *                                   format: uuid
+ *                                 start_date:
+ *                                   type: string
+ *                                   format: date-time
+ *                                 end_date:
+ *                                   type: string
+ *                                   format: date-time
+ *                                 is_confirmed:
+ *                                   type: boolean
+ *                                 type:
+ *                                   type: string
+ *                                   description: "Nur bei eigenem Eintrag"
+ *                                   enum: [WORK, VACATION, SICK, SICK_CHILD, EDUCATION, PUBLIC_HOLIDAY, COMPENSATORY_OFF, SPECIAL_LEAVE, PARENTAL_LEAVE, UNPAID_LEAVE, ON_CALL]
+ *                                 working_location:
+ *                                   type: string
+ *                                   description: "Nur bei eigenem Eintrag"
+ *                                   enum: [OFFICE, REMOTE, FIELD_SERVICE]
+ *                                   nullable: true
+ *                                 recorded_hours:
+ *                                   type: number
+ *                                   description: "Nur bei eigenem Eintrag"
+ *                                 interruption_hours:
+ *                                   type: number
+ *                                   description: "Nur bei eigenem Eintrag"
+ *       400:
+ *         description: Validierungsfehler
+ *       403:
+ *         description: Keine Berechtigung
+ *       404:
+ *         description: Abteilung nicht gefunden
+ *       500:
+ *         description: Serverfehler
  */
 export const listDepartmentCalendarAnonymized: UserRequestHandler = async (req, res, next) => {
   try {
