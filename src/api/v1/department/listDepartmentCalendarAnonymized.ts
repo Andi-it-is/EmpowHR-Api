@@ -176,7 +176,7 @@ export const listDepartmentCalendarAnonymized: UserRequestHandler = async (req, 
         .where("time_account.id IN (:...ids)", { ids: timeAccountIds })
         .andWhere("entry.start_date < :end", { end })
         .andWhere("entry.end_date >= :start", { start })
-        // .andWhere("entry.working_location IS NULL")
+        .andWhere("entry.working_location IS NULL")
         .getMany()
       : [];
 
