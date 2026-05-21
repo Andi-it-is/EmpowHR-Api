@@ -181,6 +181,7 @@ export const listDepartmentCalendarWithUsers: UserRequestHandler = async (req, r
         .where("time_account.id IN (:...ids)", { ids: timeAccountIds })
         .andWhere("entry.start_date < :end", { end })      // startet VOR Monatsende
         .andWhere("entry.end_date >= :start", { start })   // endet NACH Monatsanfang
+        .andWhere("entry.working_location IS NULL")
         .getMany()
       : [];
 

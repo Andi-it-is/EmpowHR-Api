@@ -167,6 +167,16 @@ export const updateTimeEntryByUserId: UserRequestHandler = async (req, res, next
     const type = body.type ?? timeEntry.type
     const { recorded_hours, interruption_hours } = calculateTimeEntryHours(type, start, end, timeAccount)
 
+    // Working hours do not need approval by default
+    let confirmStatus = false
+    if (body.working_location && body.type === TimeEntryType.WORK) {
+      confirmStatus = true
+    }
+    // being sick does not need approval by default
+    if (body.type === TimeEntryType.SICK || body.type === TimeEntryType.SICK_CHILD || body.type === TimeEntryType.PUBLIC_HOLIDAY) {
+      confirmStatus = true
+    }
+
     await AppDataSource.getRepository(TimeEntry).update(
       { id: entryId },
       {
@@ -190,7 +200,7 @@ export const updateTimeEntryByUserId: UserRequestHandler = async (req, res, next
         type,
         interruption_hours,
         recorded_hours,
-        is_confirmed: body.is_confirmed ?? timeEntry.is_confirmed,
+        is_confirmed: body.is_confirmed ?? confirmStatus,
       },
     })
 
