@@ -9,11 +9,13 @@ import { ExistingEntityNames, PermissionAction, PermissionScope } from '../../..
 import { getUserById } from './getUserById';
 import { createFullUser } from './createFullUser';
 import { resetPassword } from './resetPasswordByUserId';
+import { listPeopleFinderInformations } from './listPeopleFinderInformations';
 
 const userRouter = Router();
 
 userRouter.get('/simple', permissionChecker(ExistingEntityNames.USER, PermissionAction.READ), getSimpleUserInfo)
 userRouter.get('/all', permissionChecker(ExistingEntityNames.USER, PermissionAction.READ), listAllUsers)
+userRouter.get('/peopleFinder', permissionChecker(ExistingEntityNames.USER, PermissionAction.READ), listPeopleFinderInformations)
 
 userRouter.post('/create', permissionChecker(ExistingEntityNames.USER, PermissionAction.CREATE), createFullUser)
 
