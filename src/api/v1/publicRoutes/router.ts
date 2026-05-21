@@ -4,6 +4,7 @@ import { getHelloWorld, postHelloWorld, patchHelloWorld, putHelloWorld, deleteHe
 import { register } from './register';
 import { login } from './login';
 import { logout } from './logout';
+import { loginDemoAccount } from './loginDemoAccount';
 
 const publicRouter = Router();
 
@@ -13,6 +14,7 @@ publicRouter.patch('/hello/:id', patchHelloWorld)
 publicRouter.put('/hello', putHelloWorld)
 publicRouter.delete('/hello/:id', deleteHelloWorld)
 
+publicRouter.post('/login/demo', loginDemoAccount)
 publicRouter.post('/register', register)
 publicRouter.post('/login', login)
 publicRouter.post('/logout', logout)

@@ -3,6 +3,7 @@ import { UserRequestHandler } from "../../../lib/classes/UserRequestHandler"
 import { AppDataSource } from "../../../AppDataSource"
 import { Document } from "../../../entity/Document"
 import Joi from 'joi'
+import { checkPermissionScope } from '../../../lib/helpers/checkPermissionScope'
 
 
 export const paramSchema = Joi.object({
@@ -69,10 +70,21 @@ export const getDocumentById: UserRequestHandler = async (req, res, next) => {
     const doc = await AppDataSource.getRepository(Document).findOne({
       where: {
         id: params.id,
-
-        user: { id: req.user.id }
       },
     })
+
+    //* < Block to determine allowed Scope per route >
+    const isScopeAllowed = await checkPermissionScope({
+      requestingUserId: req.user.id,
+      allowedScope: req.maxTargetPermissionScope,
+      resolveTargetUserId: () => req.user.id,
+      resolveTargetDepartmentId: () => req.user.department.id,
+    })
+
+    if (!isScopeAllowed) {
+      return res.status(403).json({ success: false, message: "Keine Berechtigung für diese Aktion." })
+    }
+    //* < /Block to determine allowed Scope per route >
 
     if (!doc) return res.status(404).json({ success: false, message: 'Nicht gefunden' })
 

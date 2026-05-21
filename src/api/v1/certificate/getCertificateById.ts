@@ -3,6 +3,7 @@ import { UserRequestHandler } from "../../../lib/classes/UserRequestHandler"
 import { AppDataSource } from "../../../AppDataSource"
 import Joi from 'joi'
 import { Certificate } from '../../../entity/Certificate'
+import { checkPermissionScope } from '../../../lib/helpers/checkPermissionScope'
 
 
 export const paramSchema = Joi.object({
@@ -73,11 +74,24 @@ export const getCertificatesById: UserRequestHandler = async (req, res, next) =>
       },
     })
 
+    //* < Block to determine allowed Scope per route >
+    const isScopeAllowed = await checkPermissionScope({
+      requestingUserId: req.user.id,
+      allowedScope: req.maxTargetPermissionScope,
+      resolveTargetUserId: () => req.user.id,
+      resolveTargetDepartmentId: () => req.user.department.id,
+    })
+
+    if (!isScopeAllowed) {
+      return res.status(403).json({ success: false, message: "Keine Berechtigung für diese Aktion." })
+    }
+    //* < /Block to determine allowed Scope per route >
+
     if (!certificate) return res.status(404).json({ success: false, message: 'Nicht gefunden' })
 
     res.setHeader('Content-Type', 'application/pdf')
     res.setHeader('Content-Disposition', `inline; filename="${certificate.title}.pdf"`)
-    res.sendFile(path.resolve(certificate.file_path))
+    res.sendFile(path.join(process.cwd(), certificate.file_path))
 
   } catch (error) {
     next(error)

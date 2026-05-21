@@ -18,8 +18,11 @@ export class UserTimeAccount {
     @Column({ type: "float", nullable: false, default: 30 })
     vacation_days_per_year: number
 
-    @Column({ nullable: false, default: 0 })
+    @Column({ type: "float", nullable: false, default: 0 })
     delta_hours: number
+
+    @Column({ nullable: false })
+    valid_from: Date
 
     @CreateDateColumn()
     created_at: Date;

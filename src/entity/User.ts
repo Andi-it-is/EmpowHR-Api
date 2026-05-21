@@ -8,6 +8,12 @@ import { Department } from "./Department"
 import { Role } from "./Role"
 import { ResourceBookingEntry } from "./BookingRessourceEntry"
 
+enum Gender {
+    MALE = 'male',
+    FEMALE = 'female',
+    NONE = '-'
+}
+
 @Entity()
 export class User {
 
@@ -19,6 +25,13 @@ export class User {
 
     @Column({ nullable: false })
     lastname: string
+
+    @Column({
+        type: 'enum',
+        enum: Gender,
+        default: Gender.NONE,
+    })
+    gender: Gender;
 
     @Column({ unique: true })
     email: string
@@ -37,6 +50,10 @@ export class User {
 
     @UpdateDateColumn()
     updated_at: Date;
+
+    // Die Abteilungen, die dieser User LEITET
+    @OneToMany(() => Department, (department) => department.head)
+    ledDepartments: Department[];
 
     // Vorgesetzter
     @ManyToOne(() => User, user => user.subordinates, { nullable: true })

@@ -1,6 +1,7 @@
 import { User } from "../../../entity/User";
 import { UserRequestHandler } from "../../../lib/classes/UserRequestHandler";
 import { AppDataSource } from "../../../AppDataSource";
+import { checkPermissionScope } from "../../../lib/helpers/checkPermissionScope";
 
 /**
  * @swagger
@@ -59,11 +60,19 @@ export const getSimpleUserInfo: UserRequestHandler = async (req, res, next) => {
       .findOne({
         where: { id },
         select: {
+          id: true,
           firstname: true,
           lastname: true,
           email: true,
+          department: true
+        },
+        relations: {
+          department: {
+            head: true
+          }
         }
       })
+
 
     if (!user) {
       return res.status(404).json({
@@ -71,6 +80,20 @@ export const getSimpleUserInfo: UserRequestHandler = async (req, res, next) => {
         message: "User nicht gefunden."
       })
     }
+
+    //* < Block to determine allowed Scope per route >
+    const isScopeAllowed = await checkPermissionScope({
+      requestingUserId: req.user.id,
+      allowedScope: req.maxTargetPermissionScope,
+      resolveTargetUserId: () => user?.id,
+      resolveTargetDepartmentId: () => user?.department?.id,
+    })
+
+    if (!isScopeAllowed) {
+      return res.status(403).json({ success: false, message: `Keine Berechtigung für diese Aktion${user} ||| ${req}` })
+    }
+    //* < /Block to determine allowed Scope per route >
+
 
     return res.status(200).json({
       success: true,
