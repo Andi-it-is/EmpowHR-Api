@@ -11,8 +11,13 @@ import { createTimeEntryForUserByUserId } from './createTimeEntryForUserByUserId
 import { updateTimeEntryByUserId } from './updateTimeEntryByUserId';
 import { deleteTimeEntryByUserId } from './deleteTimeEntryByUserId';
 import { ExistingEntityNames, PermissionAction } from '../../../lib/enums/acessControl.enum';
+import { listUnconfirmedTimeEntriesByDepartment } from './listUnconfirmedTimeEntriesByDepartment';
+import { changeTimeEntryConfirmation } from './changeTimeEntryConfirmation';
 
 const timeEntryRouter = Router();
+
+// id is departmentId in this case
+timeEntryRouter.get('/unconfirmed/:id', permissionChecker(ExistingEntityNames.TIME_ENTRY, PermissionAction.READ), listUnconfirmedTimeEntriesByDepartment)
 
 timeEntryRouter.post('/my/filter', permissionChecker(ExistingEntityNames.TIME_ENTRY, PermissionAction.READ), listTimeEntriesByFilters)
 timeEntryRouter.post('/my/create', permissionChecker(ExistingEntityNames.TIME_ENTRY, PermissionAction.CREATE), createTimeEntry)
@@ -21,6 +26,8 @@ timeEntryRouter.post('/other/:id/filter', permissionChecker(ExistingEntityNames.
 
 timeEntryRouter.patch('/my/:id', permissionChecker(ExistingEntityNames.TIME_ENTRY, PermissionAction.UPDATE), updateTimeEntry)
 timeEntryRouter.patch('/other/:userId/:entryId', permissionChecker(ExistingEntityNames.TIME_ENTRY, PermissionAction.UPDATE), updateTimeEntryByUserId)
+
+timeEntryRouter.patch('/:id/confirmation', permissionChecker(ExistingEntityNames.TIME_ENTRY, PermissionAction.UPDATE), changeTimeEntryConfirmation)
 
 timeEntryRouter.delete('/my/:id', permissionChecker(ExistingEntityNames.TIME_ENTRY, PermissionAction.DELETE), deleteTimeEntry)
 timeEntryRouter.delete('/other/:userId/:entryId', permissionChecker(ExistingEntityNames.TIME_ENTRY, PermissionAction.DELETE), deleteTimeEntryByUserId)

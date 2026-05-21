@@ -67,7 +67,9 @@ export const getSimpleUserInfo: UserRequestHandler = async (req, res, next) => {
           department: true
         },
         relations: {
-          department: true
+          department: {
+            head: true
+          }
         }
       })
 
