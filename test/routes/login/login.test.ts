@@ -44,7 +44,7 @@ describe("POST /public/login", () => {
     expect(res.body.data.expires_in).toBe(6000000)
   })
 
-  // 422 – User nicht gefunden
+  // 422 – User nicht gefunden 
   it("sollte 422 zurückgeben wenn der User nicht existiert", async () => {
     const res = await request(app)
       .post("/api/v1/public/login")
@@ -68,7 +68,7 @@ describe("POST /public/login", () => {
     expect(res.body.message).toBe("Ungültige Anmeldedaten.")
   })
 
-  // 403 – User gesperrt (> 5 fehlgeschlagene Versuche)
+  // 403 – User gesperrt (mehr als 5 fehlgeschlagene Versuche)
   it("sollte 403 zurückgeben wenn der User gesperrt ist", async () => {
     await createUser({
       email: "gesperrt@firma.de",

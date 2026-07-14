@@ -7,6 +7,13 @@ jest.mock("../../../src/AppDataSource", () => {
   };
 });
 
+jest.mock("../../../src/lib/middleware/permissionChecker", () => ({
+  permissionChecker: () => (req: any, res: any, next: any) => {
+    req.maxTargetPermissionScope = "ALL";
+    next();
+  },
+}));
+
 import request from "supertest";
 import app from "../../../src/app";
 import { testDataSource } from "../../helpers/testDataSource";
