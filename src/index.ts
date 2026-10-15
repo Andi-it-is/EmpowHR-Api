@@ -1,4 +1,3 @@
-// src/index.ts
 import app from "./app";
 import { AppDataSource } from "./AppDataSource";
 
@@ -26,8 +25,20 @@ const connectToDb = async (): Promise<void> => {
 
 const delay = (n: number) => new Promise(r => setTimeout(r, n * 1000));
 
-app.listen(PORT, async () => {
+// Erst lauschen, wenn die DB steht - sonst nimmt der Socket bereits Requests an,
+// die dann auf eine nicht initialisierte DataSource laufen und ins Timeout hängen.
+const start = async (): Promise<void> => {
     console.log('Timezone:', Intl.DateTimeFormat().resolvedOptions().timeZone);
+
     await connectToDb();
-    console.log(`Backend started. Listening on port: ${PORT}`);
+
+    app.listen(PORT, () => {
+        console.log(`Backend started. Listening on port: ${PORT}`);
+    });
+};
+
+start().catch((error) => {
+    console.error("Startup fehlgeschlagen - Server wird nicht gestartet:", error);
+    process.exit(1);
 });
+

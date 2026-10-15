@@ -1,4 +1,7 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, OneToMany, JoinColumn } from "typeorm"
+import {
+    Entity, PrimaryGeneratedColumn, Column, CreateDateColumn,
+    UpdateDateColumn, ManyToOne, OneToMany, JoinColumn
+} from "typeorm"
 import { User } from "./User"
 
 @Entity()
@@ -38,3 +41,4 @@ export class Department {
     @OneToMany(() => User, user => user.department)
     users: User[]
 }
+

@@ -19,8 +19,8 @@ export const AppDataSource = new DataSource({
     migrationsRun: true,
 
     entities: [__dirname + "/entity/*.{js,ts}"],
-    migrations: [
-        __dirname + `/migration/${isProduction ? 'mysql' : 'postgres'}/*.{js,ts}`
-    ],
+    migrations: [__dirname + `/migration/${isProduction ? 'mysql' : 'postgres'}/*.{js,ts}`],
     subscribers: [__dirname + "/lib/subscribers/*.{js,ts}"],
 })
+
+
