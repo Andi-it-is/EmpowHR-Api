@@ -30,10 +30,12 @@ app.use(
       useDefaults: true,
       directives: {
         "worker-src": ["'self'", "blob:"],
-        "script-src": ["'self'", "'unsafe-inline'", "blob:", "data:"],
+        // "script-src": ["'self'", "'unsafe-inline'", "blob:", "data:"],
+        "script-src": ["'self'", "'unsafe-inline'", "'unsafe-eval'", "blob:", "data:"],
         "img-src": ["'self'", "data:", "blob:"],
         // wss: explizit für den WebSocket (presence). Moderne Browser decken ihn über 'self' ab, ältere Safari-Versionen nicht.
-        "connect-src": ["'self'", "https://empowhr.andreasivanov.de", "wss://empowhr.andreasivanov.de"],
+        // blob: für die PDF-Vorschau: documentService.getDocumentFile liefert eine blob:-URL, die pdf.js per fetch lädt
+        "connect-src": ["'self'", "https://empowhr.andreasivanov.de", "wss://empowhr.andreasivanov.de", "blob:"],
         "frame-src": ["'self'", "blob:"],
         "script-src-elem": ["'self'", "'unsafe-inline'", "blob:", "data:"],
       },
