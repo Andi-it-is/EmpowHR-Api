@@ -1,5 +1,6 @@
 import app from "./app";
 import { AppDataSource } from "./AppDataSource";
+import { attachWebSocketServer } from "./lib/websocket/socket";
 
 const PORT: string = process.env.PORT || "3000";
 
@@ -32,9 +33,11 @@ const start = async (): Promise<void> => {
 
     await connectToDb();
 
-    app.listen(PORT, () => {
+    const server = app.listen(PORT, () => {
         console.log(`Backend started. Listening on port: ${PORT}`);
     });
+
+    attachWebSocketServer(server);
 };
 
 start().catch((error) => {

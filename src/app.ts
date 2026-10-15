@@ -32,7 +32,8 @@ app.use(
         "worker-src": ["'self'", "blob:"],
         "script-src": ["'self'", "'unsafe-inline'", "blob:", "data:"],
         "img-src": ["'self'", "data:", "blob:"],
-        "connect-src": ["'self'", "https://empowhr.andreasivanov.de"],
+        // wss: explizit für den WebSocket (presence). Moderne Browser decken ihn über 'self' ab, ältere Safari-Versionen nicht.
+        "connect-src": ["'self'", "https://empowhr.andreasivanov.de", "wss://empowhr.andreasivanov.de"],
         "frame-src": ["'self'", "blob:"],
         "script-src-elem": ["'self'", "'unsafe-inline'", "blob:", "data:"],
       },

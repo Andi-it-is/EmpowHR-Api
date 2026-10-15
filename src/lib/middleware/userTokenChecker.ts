@@ -1,9 +1,8 @@
 import { APIError } from "../classes/APIError";
-import * as jwt from "jsonwebtoken";
-import { AppDataSource } from "../../AppDataSource";
 import { UserRequest, UserRequestHandler } from "../classes/UserRequestHandler";
-import { User } from "../../entity/User";
 import { RoleName } from "../enums/acessControl.enum";
+import { verifyAccessToken } from "../helpers/verifyAccessToken";
+import * as jwt from "jsonwebtoken";
 import { RequestHandler } from "express";
 
 // uses req.cookies.accessToken.  Alternatively but not implemented, one can use req.headers.authorization
@@ -23,24 +22,8 @@ export const userTokenChecker: UserRequestHandler = async (req, res, next) => {
     }
     const token = authHeader.split(" ")[1];
 
-    // 1. Verify Token
-    const decoded = jwt.verify(token, process.env.JWT_ACCESS_TOKEN_SECRET!) as {
-      userId: string
-      firstname: string
-      lastname: string
-      email: string
-      roles: RoleName[]
-      department: string | null
-    }
-
-    // 2. User + Rollen + Department aus DB holen
-    const user = await AppDataSource.getRepository(User).findOne({
-      where: { id: decoded.userId },
-      relations: {
-        roles: true,
-        department: true
-      }
-    })
+    // 1. + 2. Token prüfen, User + Rollen + Department aus DB holen
+    const user = await verifyAccessToken(token)
 
     if (!user) {
       return res.status(401).json({ success: false, message: "User nicht gefunden." })
@@ -56,10 +39,21 @@ export const userTokenChecker: UserRequestHandler = async (req, res, next) => {
 
   } catch (error) {
 
-    return res.status(401).json({
+    // Ungültiger oder abgelaufener Token -> 401 (Frontend meldet den User ab)
+    if (error instanceof jwt.JsonWebTokenError) {
+      return res.status(401).json({
+        success: false,
+        message: 'Provided Token could not be authorized',
+        error: error
+      });
+    }
+
+    // Alles andere liegt am Server (z. B. DB kurz nicht erreichbar). Kein 401, sonst würde
+    // der axios-Interceptor im Frontend das Cookie löschen und alle User abmelden.
+    console.error("userTokenChecker: Token konnte wegen eines Serverfehlers nicht geprüft werden:", error);
+    return res.status(500).json({
       success: false,
-      message: 'Provided Token could not be authorized',
-      error: error
+      message: 'Anmeldung konnte gerade nicht geprüft werden. Bitte später erneut versuchen.'
     });
   }
 };
